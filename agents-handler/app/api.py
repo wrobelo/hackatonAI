@@ -12,7 +12,7 @@ import os
 
 
 # Dynamic import for agent and runner from app/company-context-agents/context_agent.py
-context_agent_path = os.path.join(os.path.dirname(__file__), "company-context-agents", "context_agent.py")
+context_agent_path = os.path.join(os.path.dirname(__file__), "company_context_agents", "context_agent.py")
 spec = importlib.util.spec_from_file_location("context_agent", context_agent_path)
 context_agent = importlib.util.module_from_spec(spec)
 sys.modules["context_agent"] = context_agent
