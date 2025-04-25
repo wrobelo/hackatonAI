@@ -1,4 +1,4 @@
-from agents import Agent, Runner, function_tool, ModelSettings, InMemoryMemory
+from agents import Agent, Runner, function_tool, ModelSettings
 from typing import Optional, Dict, Any
 from pymongo import MongoClient
 import os
@@ -12,7 +12,6 @@ MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
 mongo_client = MongoClient(MONGODB_URI)
 mongo_db = mongo_client[os.getenv("MONGODB_DB", "brand-hero")]
 company_context_collection = mongo_db["company_context_memory"]
-memory = InMemoryMemory()
 
 @function_tool
 async def fetch_vector_db(company_id: str) -> Optional[str]:
