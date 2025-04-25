@@ -23,7 +23,7 @@ public class CreateContextRequest {
     
     /**
      * Number of posts to fetch for context generation.
-     * Default value is defined in application.properties.
+     * Default value is defined in application.yaml.
      */
     @Min(value = 1, message = "Post limit must be at least 1")
     private Integer postLimit;

@@ -151,14 +151,16 @@ public class CompanyContextService {
                             .map(this::convertPostToJson)
                             .collect(Collectors.toList()));
             
-            HttpEntity<String> request = new HttpEntity<>(requestBody.toString(), headers);
-            
-            // Call agent endpoint
-            String response = restTemplate.postForObject(agentEndpointUrl, request, String.class);
-            
-            // Parse response
-            JsonNode responseJson = objectMapper.readTree(response);
-            return responseJson.path("context").asText();
+//            HttpEntity<String> request = new HttpEntity<>(requestBody.toString(), headers);
+//
+//            // Call agent endpoint
+//            String response = restTemplate.postForObject(agentEndpointUrl, request, String.class);
+//
+//            // Parse response
+//            JsonNode responseJson = objectMapper.readTree(response);
+//            return responseJson.path("context").asText();
+
+            return requestBody.toString();
             
         } catch (Exception e) {
             log.error("Error generating context with agent", e);

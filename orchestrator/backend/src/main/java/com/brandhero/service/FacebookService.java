@@ -156,8 +156,7 @@ public class FacebookService {
      * @return a FacebookClient
      */
     private FacebookClient createFacebookClient(String accessToken) {
-        Version version = Version.valueOf(facebookApiVersion.toUpperCase().replace(".", "_").replace("V", "VERSION_"));
-        return new DefaultFacebookClient(accessToken, version);
+        return new DefaultFacebookClient(accessToken, Version.VERSION_22_0);
     }
     
     /**
