@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any
 from pymongo import MongoClient
 import os
 import logging
+from app.company_context_agents.prompts import get_company_context_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -40,21 +41,7 @@ async def store_context(company_id: str, context_description: str) -> None:
 
 async def dynamic_instructions(wrapper, agent) -> str:
     cid = wrapper.context['company_id']
-    return f"""
-Jesteś Agentem zbierającym pełny kontekst firmy o ID = {cid}.
-1. Najpierw wywołaj narzędzie fetch_vector_db({cid}) i fetch_sql_db({cid}), 
-   aby uzyskać dostępne dane historyczne.
-2. Na podstawie wyników poinformuj użytkownika, czego brakuje:
-   • misja, wizja, wartości,
-   • obszar działania i plany na przyszłość,
-   • kultura organizacyjna („duch firmy").
-3. Zadawaj konkretne pytania, aż uzyskasz wszystkie niezbędne elementy.
-4. Gdy zbierzesz komplet, połącz dane z bazy i od użytkownika w jeden spójny opis 
-   i wywołaj store_context({cid}, opis).
-5. Po zapisaniu zakończ rozmowę zwrotną do użytkownika.
-
-Odpowiadaj krok po kroku, używając tylko tych narzędzi i zakończ, gdy wywołasz store_context.
-""".strip()
+    return get_company_context_prompt(cid)
 
 class CompanyContextAgent:
     def __init__(self):
