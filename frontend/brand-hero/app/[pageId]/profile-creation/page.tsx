@@ -316,15 +316,15 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
 
     // If in edit mode, go back to dashboard, otherwise continue to brand hero creation
     if (isEditMode) {
-      router.push("/dashboard")
+      router.push(`/${params.pageId}/dashboard`)
     } else {
-      router.push(`/brand-hero-creation/${params.pageId}`)
+      router.push(`/${params.pageId}/brand-hero-creation`)
     }
   }
 
   const handleCancel = () => {
     // Only available in edit mode - go back to dashboard
-    router.push("/dashboard")
+    router.push(`/${params.pageId}/dashboard`)
   }
 
   return (

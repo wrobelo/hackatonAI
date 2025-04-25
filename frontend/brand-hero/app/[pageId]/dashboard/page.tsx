@@ -91,7 +91,7 @@ const mockPosts = [
   },
 ]
 
-const Dashboard = () => {
+const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
   const [companyProfile, setCompanyProfile] = useState<string | null>(null)
   const [brandHeroImage, setBrandHeroImage] = useState<string | null>(null)
   const [posts, setPosts] = useState<any[]>([])
@@ -110,11 +110,10 @@ const Dashboard = () => {
 
     if (!profile || !heroImage) {
       // Redirect to appropriate setup page
-      const pageId = localStorage.getItem("selected_page_id")
       if (!profile) {
-        router.push(`/profile-creation/${pageId}`)
+        router.push(`/${pageId}/profile-creation`)
       } else if (!heroImage) {
-        router.push(`/brand-hero-creation/${pageId}`)
+        router.push(`/${pageId}/brand-hero-creation`)
       }
       return
     }
@@ -128,17 +127,15 @@ const Dashboard = () => {
   }, [router])
 
   const handleEditProfile = () => {
-    const pageId = localStorage.getItem("selected_page_id")
-    router.push(`/profile-creation/${pageId}`)
+    router.push(`/${pageId}/profile-creation`)
   }
 
   const handleEditBrandHero = () => {
-    const pageId = localStorage.getItem("selected_page_id")
-    router.push(`/brand-hero-creation/${pageId}`)
+    router.push(`/${pageId}/brand-hero-creation`)
   }
 
   const handleCreatePosts = () => {
-    router.push("/create-posts")
+    router.push(`/${pageId}/create-posts`)
   }
 
   const handleApprovePost = (postId: number) => {

@@ -154,7 +154,7 @@ const mockBrandHeroImages = [
   "/placeholder.svg?height=400&width=400",
 ]
 
-const BrandHeroCreationPage = ({ params }: { params: { pageId: string } }) => {
+const BrandHeroCreationPage = ({ params: {pageId} }: { params: { pageId: string } }) => {
   // Update the state type
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState("")
@@ -176,7 +176,7 @@ const BrandHeroCreationPage = ({ params }: { params: { pageId: string } }) => {
     }
 
     if (!profile) {
-      router.push(`/profile-creation/${params.pageId}`)
+      router.push(`/${pageId}/profile-creation`)
       return
     }
 
@@ -201,7 +201,7 @@ const BrandHeroCreationPage = ({ params }: { params: { pageId: string } }) => {
       // Initialize chat with first message for new creation
       setMessages([mockConversation[0]])
     }
-  }, [router, params.pageId])
+  }, [router, pageId])
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -274,12 +274,12 @@ const BrandHeroCreationPage = ({ params }: { params: { pageId: string } }) => {
     localStorage.setItem("brand_hero_image", mockBrandHeroImages[currentImageIndex])
 
     // Redirect to dashboard
-    router.push(`/dashboard`)
+    router.push(`/${pageId}/dashboard`)
   }
 
   const handleCancel = () => {
     // Only available in edit mode - go back to dashboard without saving changes
-    router.push(`/dashboard`)
+    router.push(`/${pageId}/dashboard`)
   }
 
   return (

@@ -90,11 +90,8 @@ const PageSelectionPage = () => {
   }
 
   const handlePageSelect = (pageId: string) => {
-    // Store selected page ID
-    localStorage.setItem("selected_page_id", pageId)
-
     // Redirect to profile creation
-    router.push(`/profile-creation/${pageId}`)
+    router.push(`/${pageId}/profile-creation`)
   }
 
   return (

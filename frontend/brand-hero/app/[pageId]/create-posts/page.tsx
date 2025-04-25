@@ -191,7 +191,7 @@ const mockSuggestedPosts = [
   },
 ]
 
-const CreatePostsPage = () => {
+const CreatePostsPage = ({params}: { params: { pageId: string } }) => {
   // Update the state type
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState("")
@@ -284,7 +284,7 @@ const CreatePostsPage = () => {
   }
 
   const handleBackToDashboard = () => {
-    router.push("/dashboard")
+    router.push(`/${params.pageId}/dashboard`)
   }
 
   return (
