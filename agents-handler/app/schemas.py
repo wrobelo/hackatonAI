@@ -42,3 +42,6 @@ class GenerateImageOutput(BaseModel):
 class ImageAgentOutput(BaseModel):
     scene_description: str
     image_url: HttpUrl
+
+class CompanyContextRequest(BaseModel):
+    user_response: Optional[str] = None

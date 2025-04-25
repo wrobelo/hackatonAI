@@ -3,3 +3,4 @@ uvicorn[standard]
 python-dotenv
 openai
 openai-agents
+pymongo==4.7.2
