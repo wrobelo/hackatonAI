@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "company_contexts")
+@Document(collection = "company_initial_memory")
 public class CompanyContext {
     
     @Id
@@ -29,6 +29,8 @@ public class CompanyContext {
     
     private String userId;
     private String username;
+
+    private String pageContent;
     
     private String contextContent;
     
