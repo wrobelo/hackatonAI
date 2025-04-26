@@ -2,7 +2,6 @@ from typing import Optional, Dict, Any, Tuple
 import logging
 from pymongo import MongoClient
 import os
-import datetime
 import requests
 import base64
 import gridfs
@@ -85,8 +84,7 @@ async def update_company_context(company_id: str, context_description: str, prev
         
         # Przygotuj dane do aktualizacji
         update_data = {
-            "context_description": context_description,
-            "updated_at": datetime.datetime.utcnow()
+            "context_description": context_description
         }
         
         # Dodaj previous_response_id, jeśli istnieje
@@ -242,7 +240,6 @@ async def update_brandhero_context(
         # Przygotuj dane do aktualizacji
         update_data = {
             "brandhero_context": brandhero_context,
-            "updated_at": datetime.datetime.utcnow()
         }
         
         # Dodaj opcjonalne pola, jeśli istnieją

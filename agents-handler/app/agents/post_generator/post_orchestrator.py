@@ -2,7 +2,6 @@ import os
 import json
 import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime
 from pymongo import MongoClient
 from app.agents.post_generator.image_agent import ImageAgent
 from app.agents.post_generator.post_generator_agent import generate_posts
@@ -99,8 +98,6 @@ async def save_post(post_data: str) -> Dict[str, Any]:
         post["post_id"] = str(bson.ObjectId())
     if "company_id" not in post:
         raise ValueError("company_id is required to save a post")
-    if "created_at" not in post:
-        post["created_at"] = datetime.utcnow().isoformat()
     posts_collection.update_one({"post_id": post["post_id"]}, {"$set": post}, upsert=True)
     logger.info(f"Saved post_id={post['post_id']}")
     return {"success": True, "post": post}
@@ -155,8 +152,7 @@ class PostOrchestratorAgent:
                 "hashtags": draft["hashtags"],
                 "call_to_action": draft["call_to_action"],
                 "scene_description": img_out.get("scene_description",""),
-                "image_url": img_out.get("image_url",""),
-                "created_at": datetime.utcnow().isoformat()
+                "image_url": img_out.get("image_url","")
             }
             if save_to_db:
                 posts_collection.update_one({"post_id": post["post_id"]}, {"$set": post}, upsert=True)
