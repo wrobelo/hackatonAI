@@ -18,6 +18,7 @@ import {
 } from "@mui/material"
 import { Edit, Plus, Check, Clock } from "lucide-react"
 import Header from "@/components/header"
+import {useQuery} from "@tanstack/react-query";
 
 const StyledContainer = styled(Container)`
   padding: 2rem;
@@ -92,15 +93,24 @@ const mockPosts = [
 ]
 
 const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
-  const [companyProfile, setCompanyProfile] = useState<string | null>(null)
   const [brandHeroImage, setBrandHeroImage] = useState<string | null>(null)
   const [posts, setPosts] = useState<any[]>([])
   const router = useRouter()
 
+  const { isPending, error, data } = useQuery({
+    queryKey: ['get.company-context'],
+    queryFn: () =>
+        fetch(`/api/company-context/${pageId}`).then((res): Promise<{
+              company_id: string;
+              context_description: string;
+            }> =>
+                res.json(),
+        ),
+  })
+
   useEffect(() => {
     // Check if user is logged in and has completed setup
     const token = localStorage.getItem("fb_access_token")
-    const profile = localStorage.getItem("company_profile")
     const heroImage = localStorage.getItem("brand_hero_image")
 
     if (!token) {
@@ -108,9 +118,9 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
       return
     }
 
-    if (!profile || !heroImage) {
+    if ((!isPending && !data?.context_description) || !heroImage) {
       // Redirect to appropriate setup page
-      if (!profile) {
+      if (!data?.context_description) {
         router.push(`/${pageId}/profile-creation`)
       } else if (!heroImage) {
         router.push(`/${pageId}/brand-hero-creation`)
@@ -119,7 +129,6 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
     }
 
     // Set data
-    setCompanyProfile(profile)
     setBrandHeroImage(heroImage)
 
     // Set mock posts
@@ -164,9 +173,9 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
               <Typography variant="h6" gutterBottom>
                 Company Profile
               </Typography>
-              {companyProfile && (
+              {data?.context_description && (
                 <Typography variant="body2" component="pre" sx={{ whiteSpace: "pre-wrap" }}>
-                  {companyProfile}
+                  {data.context_description}
                 </Typography>
               )}
             </TileContent>

@@ -88,7 +88,7 @@ async def generate_brand_hero(company_id: str) -> str:
                 "content": [
                     {
                         "type": "text",
-                        "text": "Przygotuj mi bardzo dokładny opis postaci na obrazku. Chcę by opis dokładnie odzwierciedlał zarówno wygląd zewnętrzny jak i cechy charakteru postaci. Pamiętaj, żeby na podstawie opisu dało się dokładnie odtworzyć stylistykę pierwotnego obrazu. Chcę wykorzystywać opis do tworzenia kolejnych obrazów tej postaci podczas różnych czynności."
+                        "text": "Prepare a very detailed description of the character in the image for me. I want the description to accurately reflect both the external appearance and the character traits of the figure. Remember that the description should allow for the exact recreation of the original image's style. I want to use the description to create additional images of this character performing different activities."
                     },
                     {
                         "type": "image_url",
@@ -325,13 +325,30 @@ class BranHeroContextAgent:
         # 1. Zbuduj kontekst dla agenta
         context = {"company_id": company_id}
 
-        # 2. Pobierz poprzedni identyfikator odpowiedzi z MongoDB
+        # 2. Pobierz poprzedni identyfikator odpowiedzi i kontekst z MongoDB
         doc = await get_brandhero_context(company_id)
         previous_response_id = doc.get("previous_response_id") if doc else None
-
-        # Jeśli mamy odpowiedź użytkownika i poprzedni identyfikator odpowiedzi,
-        # przekazujemy je do agenta
-        if user_response and previous_response_id:
+        
+        # 3. Check if we already have a complete brand hero context with description and image
+        if doc and "brandhero_context" in doc and "brandhero_description" in doc and "image_url" in doc and not user_response:
+            # We have a complete brand hero context and no user response, so we should present the existing data
+            logger.info(f"Found existing complete brand hero context for company {company_id}, presenting to user")
+            
+            # Create a special message to inform the agent that we have existing data
+            existing_context_message = f"""EXISTING_BRANDHERO_DATA:
+Brand Hero Context: {doc['brandhero_context']}
+Brand Hero Description: {doc['brandhero_description']}
+Image URL: {doc['image_url']}
+"""
+            
+            # Run the agent with this special message
+            result = await Runner.run(
+                self.agent,
+                context=context,
+                input=existing_context_message
+            )
+        # 4. If we have a user response and previous_response_id, continue the conversation
+        elif user_response and previous_response_id:
             # Uruchom agenta z kontekstem i odpowiedzią użytkownika
             logger.info(f"Running agent with user response for company {company_id}")
             result = await Runner.run(

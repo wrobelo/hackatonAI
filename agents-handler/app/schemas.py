@@ -47,7 +47,6 @@ class CompanyContextRequest(BaseModel):
     user_response: Optional[str] = None
 
 class BrandHeroContextRequest(BaseModel):
-    company_context: Optional[str] = None
     user_response: Optional[str] = None
 
 class GenerateBrandHeroImageRequest(BaseModel):
@@ -82,4 +81,3 @@ class BrandHeroContextResponse(BaseModel):
     brandhero_context: str
     brandhero_description: Optional[str] = None
     image_url: Optional[str] = None
-    image_base64: Optional[str] = None
