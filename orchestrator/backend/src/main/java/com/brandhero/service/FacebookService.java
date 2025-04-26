@@ -3,6 +3,7 @@ package com.brandhero.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.restfb.BinaryAttachment;
 import com.restfb.types.StoryAttachment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -148,6 +149,118 @@ public class FacebookService {
                 .description(page.getDescription())
                 .website(page.getWebsite())
                 .build();
+    }
+    
+    /**
+     * Create a post on a Facebook page with text content only.
+     * 
+     * @param pageId the Facebook page ID
+     * @param accessToken the Facebook access token for the page
+     * @param message the message content of the post
+     * @return the created FacebookPost
+     */
+    public FacebookPost createPost(String pageId, String accessToken, String message) {
+        log.info("Creating text post on page {}", pageId);
+        
+        FacebookClient facebookClient = createFacebookClient(accessToken);
+        
+        // Create the post
+        Post publishedPost = facebookClient.publish(
+                pageId + "/feed",
+                Post.class,
+                Parameter.with("message", message)
+        );
+        
+        log.info("Successfully created post with ID: {}", publishedPost.getId());
+        
+        // Fetch the complete post to get all fields
+        Post completePost = facebookClient.fetchObject(
+                publishedPost.getId(),
+                Post.class,
+                Parameter.with("fields", "attachments,created_time,message,type,permalink_url,likes.summary(true),comments.summary(true),shares")
+        );
+        
+        return convertToFacebookPost(completePost, pageId);
+    }
+    
+    /**
+     * Create a post on a Facebook page with an image attachment.
+     * 
+     * @param pageId the Facebook page ID
+     * @param accessToken the Facebook access token for the page
+     * @param message the message content of the post
+     * @param imageData the binary image data to upload
+     * @param filename the name of the image file (e.g., "image.jpg")
+     * @return the created FacebookPost
+     */
+    public FacebookPost createPostWithImage(String pageId, String accessToken, String message, byte[] imageData, String filename) {
+        log.info("Creating image post on page {}", pageId);
+        
+        FacebookClient facebookClient = createFacebookClient(accessToken);
+        
+        // Determine content type based on filename extension
+        String contentType = "image/jpeg"; // Default
+        if (filename.toLowerCase().endsWith(".png")) {
+            contentType = "image/png";
+        } else if (filename.toLowerCase().endsWith(".gif")) {
+            contentType = "image/gif";
+        }
+        
+        // Create binary attachment for the image
+        BinaryAttachment attachment = BinaryAttachment.with(filename, imageData, contentType);
+        
+        // Create the post with the image
+        Post publishedPost = facebookClient.publish(
+                pageId + "/photos",
+                Post.class,
+                attachment,
+                Parameter.with("message", message)
+        );
+        
+        log.info("Successfully created post with image, ID: {}", publishedPost.getId());
+        
+        // Fetch the complete post to get all fields
+        Post completePost = facebookClient.fetchObject(
+                publishedPost.getId(),
+                Post.class,
+                Parameter.with("fields", "attachments,created_time,message,type,permalink_url,likes.summary(true),comments.summary(true),shares")
+        );
+        
+        return convertToFacebookPost(completePost, pageId);
+    }
+    
+    /**
+     * Create a post on a Facebook page with a link.
+     * 
+     * @param pageId the Facebook page ID
+     * @param accessToken the Facebook access token for the page
+     * @param message the message content of the post
+     * @param linkUrl the URL to include in the post
+     * @return the created FacebookPost
+     */
+    public FacebookPost createPostWithLink(String pageId, String accessToken, String message, String linkUrl) {
+        log.info("Creating link post on page {}", pageId);
+        
+        FacebookClient facebookClient = createFacebookClient(accessToken);
+        
+        // Create the post with the link
+        Post publishedPost = facebookClient.publish(
+                pageId + "/feed",
+                Post.class,
+                Parameter.with("message", message),
+                Parameter.with("link", linkUrl)
+        );
+        
+        log.info("Successfully created post with link, ID: {}", publishedPost.getId());
+        
+        // Fetch the complete post to get all fields
+        Post completePost = facebookClient.fetchObject(
+                publishedPost.getId(),
+                Post.class,
+                Parameter.with("fields", "attachments,created_time,message,type,permalink_url,likes.summary(true),comments.summary(true),shares")
+        );
+        
+        return convertToFacebookPost(completePost, pageId);
     }
     
     /**
