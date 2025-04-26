@@ -5,21 +5,24 @@ import {useRef, useState} from "react";
 import axios from "axios";
 import {styled} from "styled-components";
 import {Paper, Box} from "@mui/material";
+import {Stack} from "@mui/system";
 
 const ChatContainer = styled(Box)`
   display: flex;
   flex-direction: column;
   flex: 1;
   overflow: hidden;
+    margin: 0 auto;
     justify-content: flex-end;
+    height: 100%;
 `
 
 const MessagesContainer = styled(Box)`
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
-  display: flex;
   flex-direction: column;
+    justify-content: flex-end;
   gap: 1rem;
 `
 
@@ -64,7 +67,6 @@ interface ApiResponse {
 
 export const Chat = () => {
     const theme = useTheme();
-    theme
     const messagesEndRef = useRef<null | HTMLDivElement>(null)
     const [messages, setMessages] = useState<ChatMessage[]>([])
     const [inputValue, setInputValue] = useState("")
@@ -119,6 +121,7 @@ export const Chat = () => {
     return (
         <ChatContainer>
             <MessagesContainer>
+                <Stack>
                 {Array.isArray(messages) &&
                     messages.map((message) => {
                         // Skip rendering if message is undefined
@@ -138,6 +141,7 @@ export const Chat = () => {
                         )
                     })}
                 <div ref={messagesEndRef} />
+                </Stack>
             </MessagesContainer>
 
             <MessageInputContainer>
