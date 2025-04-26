@@ -31,6 +31,9 @@ public class VectorStoreService {
         if (jsonNode.has("type")) {
             metadata.put("type", jsonNode.get("type").asText());
         }
+        if (jsonNode.has("page_id")) {
+            metadata.put("company_id", jsonNode.get("page_id").asText());
+        }
         // Create document
         Document document = new Document(content, metadata);
 

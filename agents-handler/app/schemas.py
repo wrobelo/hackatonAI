@@ -45,3 +45,7 @@ class ImageAgentOutput(BaseModel):
 
 class CompanyContextRequest(BaseModel):
     user_response: Optional[str] = None
+
+class CompanyContextResponse(BaseModel):
+    company_id: str
+    context_description: str

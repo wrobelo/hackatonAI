@@ -179,6 +179,7 @@ public class CompanyContextService {
         postNode.put("pageId", post.getPageId());
         postNode.put("message", post.getMessage());
         postNode.put("created_time", post.getCreatedTime().toString());
+        postNode.put("type", "post");
 
         if (post.getImageUrls() != null && !post.getImageUrls().isEmpty()) {
             ArrayNode imageUrlsNode = postNode.putArray("image_urls");
@@ -203,6 +204,7 @@ public class CompanyContextService {
             requestBody.put("page_about", page.getAbout());
             requestBody.put("page_description", page.getDescription());
             requestBody.put("page_website", page.getWebsite());
+        requestBody.put("type", "data");
 
 
             return requestBody;
