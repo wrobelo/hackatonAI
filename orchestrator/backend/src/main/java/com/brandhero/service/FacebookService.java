@@ -94,7 +94,7 @@ public class FacebookService {
         Connection<Post> postsConnection = facebookClient.fetchConnection(
                 pageId + "/feed",
                 Post.class, 
-                Parameter.with("fields", "attachments,created_time"),
+                Parameter.with("fields", "attachments,created_time,message"),
                 //Parameter.with("fields", "id,message,created_time,type,permalink_url,likes.summary(true),comments.summary(true),shares"),
                 Parameter.with("limit", postLimit)
         );
@@ -107,7 +107,7 @@ public class FacebookService {
                     break;
                 }
                 
-                FacebookPost facebookPost = convertToFacebookPost(post);
+                FacebookPost facebookPost = convertToFacebookPost(post, pageId);
                 posts.add(facebookPost);
             }
             
@@ -166,7 +166,7 @@ public class FacebookService {
      * @param post the RestFB Post
      * @return a FacebookPost
      */
-    private FacebookPost convertToFacebookPost(Post post) {
+    private FacebookPost convertToFacebookPost(Post post, String pageId) {
         List<String> imageUrls = new ArrayList<>();
         String videoUrl = null;
         String linkUrl = null;
@@ -194,6 +194,7 @@ public class FacebookService {
         
         return FacebookPost.builder()
                 .id(post.getId())
+                .pageId(pageId)
                 .message(post.getMessage())
                 .createdTime(post.getCreatedTime().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime())
                 .type(post.getType())
