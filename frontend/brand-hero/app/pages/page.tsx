@@ -84,7 +84,7 @@ const PageSelectionPage = () => {
 
   const handlePageSelect = (pageId: string) => {
     // Redirect to profile creation
-    router.push(`/${pageId}/profile-creation`)
+    router.push(`/${pageId}/scraping`)
   }
 
   return (

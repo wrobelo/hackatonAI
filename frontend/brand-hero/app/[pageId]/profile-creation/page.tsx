@@ -9,7 +9,6 @@ import {
   Typography,
   Button,
   Container,
-  CircularProgress,
   Card,
   CardContent,
 } from "@mui/material"
@@ -62,19 +61,9 @@ const ProfileSummaryCard = styled(Card)`
 `
 
 
-// Mock loading messages
-const loadingMessages = [
-  "Analyzing your Facebook page content...",
-  "Learning about your brand voice...",
-  "Identifying key themes and patterns...",
-  "Extracting brand personality traits...",
-  "Almost there! Finalizing your profile...",
-]
+
 
 const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
-  const [stage, setStage] = useState<"loading" | "chat" | "summary">("loading")
-  const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0])
-  const [profileSummary, setProfileSummary] = useState("")
   const [isEditMode, setIsEditMode] = useState(false)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const router = useRouter()
@@ -91,39 +80,13 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
         ),
   })
 
-  useEffect(() => {
 
-    // Check if we're in edit mode (profile already exists)
-    const existingProfile = localStorage.getItem("company_profile")
-    if (existingProfile) {
-      setProfileSummary(existingProfile)
-    }
-
-    // Simulate loading process
-    let messageIndex = 0
-    const interval = setInterval(() => {
-      messageIndex = (messageIndex + 1) % loadingMessages.length
-      setLoadingMessage(loadingMessages[messageIndex])
-    }, 3000)
-
-    // After loading, start the chat
-    const timeout = setTimeout(() => {
-      clearInterval(interval)
-      setStage("chat")
-    }, 8000)
-
-    return () => {
-      clearInterval(interval)
-      clearTimeout(timeout)
-    }
-  }, [router])
 
   useEffect(() => {
     if (!initialLoadDone && (data || error)) {
       const editing = !!data?.context_description
       if (editing) {
         setIsEditMode(true);
-        setStage("chat")
       }
       setInitialLoadDone(true);
     }
@@ -131,9 +94,6 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
 
 
   const handleConfirmProfile = () => {
-    // Save profile to localStorage (in a real app, this would be saved to a database)
-    localStorage.setItem("company_profile", profileSummary)
-
     // If in edit mode, go back to dashboard, otherwise continue to brand hero creation
     if (isEditMode) {
       router.push(`/${params.pageId}/dashboard`)
@@ -147,17 +107,6 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
     <>
       <Header />
       <StyledContainer>
-        {stage === "loading" ? (
-          <LoadingContainer>
-            <CircularProgress size={60} sx={{ mb: 4 }} />
-            <Typography variant="h5" gutterBottom>
-              {initialLoadDone ? loadingMessage : ''}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {initialLoadDone && 'This may take a moment as we analyze your Facebook page'}
-            </Typography>
-          </LoadingContainer>
-        ) : (
           <ChatContainer sx={{height: "100%"}}>
             <Typography variant="h5" gutterBottom>
               {isEditMode ? "Editing Your Company Profile" : "Creating Your Company Profile"}
@@ -197,7 +146,6 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
 
 
           </ChatContainer>
-        )}
       </StyledContainer>
     </>
   )

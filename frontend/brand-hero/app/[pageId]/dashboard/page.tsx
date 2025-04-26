@@ -148,7 +148,9 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
   }, [router])
 
   const handleEditProfile = () => {
-    router.push(`/${pageId}/profile-creation`)
+    companyContextData?.context_description
+      ? router.push(`/${pageId}/profile-creation`)
+      : router.push(`/${pageId}/scraping`)
   }
 
   const handleEditBrandHero = () => {
