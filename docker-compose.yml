@@ -1,5 +1,22 @@
 version: "3.8"
 services:
+  agents-handler:
+    build:
+      context: ./agents-handler
+      dockerfile: Dockerfile
+    container_name: agents-handler
+    restart: unless-stopped
+    ports:
+      - "8070:8070"
+    environment:
+      - OPENAI_API_KEY=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
+      - MONGODB_URI=mongodb://mongo:27017
+      - MONGO_DB=brand-hero
+    depends_on:
+      - mongo
+      - qdrant
+    networks:
+      - agents-network
   mongo:
     image: mongo:6.0
     container_name: mongo
