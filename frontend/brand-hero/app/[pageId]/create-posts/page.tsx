@@ -156,16 +156,6 @@ const CreatePostsPage = ({params}: { params: { pageId: string } }) => {
   const router = useRouter()
 
   useEffect(() => {
-    // Check if user is logged in and has completed setup
-    const token = localStorage.getItem("fb_access_token")
-    const profile = localStorage.getItem("company_profile")
-    const heroImage = localStorage.getItem("brand_hero_image")
-
-    if (!token || !profile || !heroImage) {
-      router.push("/")
-      return
-    }
-
     // Initialize chat with first message
     setMessages([mockConversation[0]])
   }, [router])

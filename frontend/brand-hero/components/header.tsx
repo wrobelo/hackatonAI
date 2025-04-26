@@ -33,9 +33,6 @@ const Header = () => {
   }
 
   const handleLogout = () => {
-    // Clear local storage
-    localStorage.removeItem("fb_access_token")
-
     // Redirect to login page
     router.push("/")
     handleMenuClose()

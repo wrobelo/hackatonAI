@@ -92,12 +92,6 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
   })
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem("fb_access_token")
-    if (!token) {
-      router.push("/")
-      return
-    }
 
     // Check if we're in edit mode (profile already exists)
     const existingProfile = localStorage.getItem("company_profile")

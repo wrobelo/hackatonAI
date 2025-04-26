@@ -93,7 +93,6 @@ const mockPosts = [
 ]
 
 const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
-  const [brandHeroImage, setBrandHeroImage] = useState<string | null>(null)
   const [posts, setPosts] = useState<any[]>([])
   const router = useRouter()
 
@@ -133,14 +132,6 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
   })
 
   useEffect(() => {
-    // Check if user is logged in and has completed setup
-    const token = localStorage.getItem("fb_access_token")
-    const heroImage = localStorage.getItem("brand_hero_image")
-
-    if (!token) {
-      router.push("/")
-      return
-    }
 
     // if ((!isPending && !companyContextData?.context_description) || !heroImage) {
     //   // Redirect to appropriate setup page
@@ -151,9 +142,6 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
     //   }
     //   return
     // }
-
-    // Set data
-    setBrandHeroImage(heroImage)
 
     // Set mock posts
     setPosts(mockPosts)
@@ -220,7 +208,6 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
                 Brand Hero
               </Typography>
               {brandHeroContextData?.image_url && (<Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-                {brandHeroImage && (
                   <Box
                     component="img"
                     src={brandHeroContextData?.image_url}
@@ -231,7 +218,6 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
                       objectFit: "contain",
                     }}
                   />
-                )}
               </Box>)}
             </TileContent>
             <CardActions>

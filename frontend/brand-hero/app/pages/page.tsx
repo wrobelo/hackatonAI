@@ -53,13 +53,6 @@ const PageSelectionPage = () => {
   const router = useRouter()
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem("fb_access_token")
-    if (!token) {
-      router.push("/")
-      return
-    }
-
     // Fetch pages (mock implementation)
     const fetchPages = async () => {
       try {
