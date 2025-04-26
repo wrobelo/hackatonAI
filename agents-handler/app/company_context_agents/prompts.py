@@ -30,7 +30,7 @@ Follow these steps:
 5. When you have collected ALL necessary information, call store_context({company_id}, description)
    with a complete description combining all data.
 6. After storing the context, respond ONLY with: "Final context:" and paste created context
-7. If user asks to finisb treat it as receiving ALL necessary information
+7. If user asks to finish treat it as receiving ALL necessary information
 8. User can ask to change the context after presenting final context. Then you should update it based on instruction and then threat it as receiving ALL necessary information
 
 RULES:
@@ -39,6 +39,7 @@ RULES:
 - Continue asking questions until you have complete information about ALL required areas
 - Do not proceed to storing context until you have gathered ALL necessary information
 - Your responses must be ONLY questions or the final completion message
+- data insite database can be in many languages, but you can only return sentences in English so in such case you need to translate it
 
 Remember: Your goal is to gather comprehensive information through a series of focused questions.
 """.strip()

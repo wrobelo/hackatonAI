@@ -45,3 +45,34 @@ class ImageAgentOutput(BaseModel):
 
 class CompanyContextRequest(BaseModel):
     user_response: Optional[str] = None
+
+class BrandHeroContextRequest(BaseModel):
+    company_context: Optional[str] = None
+    user_response: Optional[str] = None
+
+class GenerateBrandHeroImageRequest(BaseModel):
+    company: str
+    prompt: str
+    contextId: str
+
+class GenerateBrandHeroImageResponse(BaseModel):
+    contextId: str
+
+class SaveImage(BaseModel):
+    image_url: str
+    contextId: str
+    description: str
+
+# Model zapytania od użytkownika
+class UserMessage(BaseModel):
+    user_id: str
+    message: str
+
+# Model odpowiedzi z obrazkiem
+class ImageResponse(BaseModel):
+    image_url: str
+    description: str
+
+class CompanyContextResponse(BaseModel):
+    company_id: str
+    context_description: str

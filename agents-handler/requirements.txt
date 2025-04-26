@@ -4,3 +4,4 @@ python-dotenv
 openai
 openai-agents
 pymongo==4.7.2
+qdrant-client

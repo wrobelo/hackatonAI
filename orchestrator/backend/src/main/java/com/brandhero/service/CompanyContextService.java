@@ -72,8 +72,7 @@ public class CompanyContextService {
 
         // Generate context using agent
         String contextContent = generateContextWithAgent(page, posts);
-        vectorStoreService.save(convertPageToJson(page));
-        posts.stream().forEach(post -> vectorStoreService.save(convertPostToJson(post)));
+        String pageContentJson = convertPageToJson(page,posts).toString();
 
         // Save context to database
         CompanyContext companyContext = CompanyContext.builder()
@@ -81,6 +80,7 @@ public class CompanyContextService {
                 .pageName(page.getName())
                 .username(username)
                 .contextContent(contextContent)
+                .pageContent(pageContentJson)
                 .createdAt(LocalDateTime.now())
                 .postIds(posts.stream().map(FacebookPost::getId).collect(Collectors.toList()))
                 .postsCount(posts.size())
@@ -179,6 +179,7 @@ public class CompanyContextService {
         postNode.put("pageId", post.getPageId());
         postNode.put("message", post.getMessage());
         postNode.put("created_time", post.getCreatedTime().toString());
+        postNode.put("type", "post");
 
         if (post.getImageUrls() != null && !post.getImageUrls().isEmpty()) {
             ArrayNode imageUrlsNode = postNode.putArray("image_urls");
@@ -189,7 +190,7 @@ public class CompanyContextService {
         return postNode;
     }
 
-    private JsonNode convertPageToJson(FacebookPage page) {
+    private JsonNode convertPageToJson(FacebookPage page, List<FacebookPost> posts) {
         log.info("Generating context with agent for page: {}", page.getName());
 
             // Prepare request to agent
@@ -203,6 +204,11 @@ public class CompanyContextService {
             requestBody.put("page_about", page.getAbout());
             requestBody.put("page_description", page.getDescription());
             requestBody.put("page_website", page.getWebsite());
+
+            requestBody.putArray("posts")
+                .addAll(posts.stream()
+                        .map(this::convertPostToJson)
+                        .collect(Collectors.toList()));
 
 
             return requestBody;

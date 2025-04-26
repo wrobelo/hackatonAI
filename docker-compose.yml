@@ -12,6 +12,10 @@ services:
       - OPENAI_API_KEY=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
       - MONGODB_URI=mongodb://mongo:27017
       - MONGO_DB=brand-hero
+      - PORT=8070
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - QDRANT_COLLECTION=brand_hero
     depends_on:
       - mongo
       - qdrant
