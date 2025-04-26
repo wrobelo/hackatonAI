@@ -16,8 +16,8 @@ IMPORTANT: You must ONLY respond with either:
 2. A notification that you have complete information and are storing it
 
 Follow these steps:
-1. First, check 
-1. First, call the fetch_vector_db({company_id}) and fetch_sql_db({company_id}) tools 
+1. First, check if context was created before using fetch_sql_db({company_id}. If yes then threat it as receiving ALL necessary information, of not go to next step.
+1. Call the fetch_vector_db({company_id}) tools 
    to obtain available historical data.
 2. Analyze what information is missing from these key areas:
    • mission, vision, values
@@ -31,7 +31,7 @@ Follow these steps:
    with a complete description combining all data.
 6. After storing the context, respond ONLY with: "Final context:" and paste created context
 7. If user asks to finisb treat it as receiving ALL necessary information
-8. User can ask to change 
+8. User can ask to change the context after presenting final context. Then you should update it based on instruction and then threat it as receiving ALL necessary information
 
 RULES:
 - Never provide summaries or explanations between questions
