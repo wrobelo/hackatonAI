@@ -97,12 +97,25 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
   const [posts, setPosts] = useState<any[]>([])
   const router = useRouter()
 
-  const { isPending, error, data } = useQuery({
+  const {data: companyContextData } = useQuery({
     queryKey: ['get.company-context'],
     queryFn: () =>
         fetch(`/api/company-context/${pageId}`).then((res): Promise<{
               company_id: string;
               context_description: string;
+            }> =>
+                res.json(),
+        ),
+  })
+
+  const { data: brandHeroContextData } = useQuery({
+    queryKey: ['get.brand-hero-context'],
+    queryFn: () =>
+        fetch(`/api/brand-hero-context/${pageId}`).then((res): Promise<{
+              company_id: string;
+              brandhero_context: string;
+              brandhero_description?: string;
+              image_url?: string;
             }> =>
                 res.json(),
         ),
@@ -118,15 +131,15 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
       return
     }
 
-    if ((!isPending && !data?.context_description) || !heroImage) {
-      // Redirect to appropriate setup page
-      if (!data?.context_description) {
-        router.push(`/${pageId}/profile-creation`)
-      } else if (!heroImage) {
-        router.push(`/${pageId}/brand-hero-creation`)
-      }
-      return
-    }
+    // if ((!isPending && !companyContextData?.context_description) || !heroImage) {
+    //   // Redirect to appropriate setup page
+    //   if (!companyContextData?.context_description) {
+    //     router.push(`/${pageId}/profile-creation`)
+    //   } else if (!heroImage) {
+    //     router.push(`/${pageId}/brand-hero-creation`)
+    //   }
+    //   return
+    // }
 
     // Set data
     setBrandHeroImage(heroImage)
@@ -173,9 +186,9 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
               <Typography variant="h6" gutterBottom>
                 Company Profile
               </Typography>
-              {data?.context_description && (
+              {companyContextData?.context_description && (
                 <Typography variant="body2" component="pre" sx={{ whiteSpace: "pre-wrap" }}>
-                  {data.context_description}
+                  {companyContextData.context_description}
                 </Typography>
               )}
             </TileContent>
@@ -191,11 +204,11 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
               <Typography variant="h6" gutterBottom>
                 Brand Hero
               </Typography>
-              <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+              {brandHeroContextData?.image_url && (<Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
                 {brandHeroImage && (
                   <Box
                     component="img"
-                    src={brandHeroImage}
+                    src={brandHeroContextData?.image_url}
                     alt="Brand Hero Character"
                     sx={{
                       maxWidth: "100%",
@@ -204,7 +217,7 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
                     }}
                   />
                 )}
-              </Box>
+              </Box>)}
             </TileContent>
             <CardActions>
               <Button startIcon={<Edit size={18} />} onClick={handleEditBrandHero}>

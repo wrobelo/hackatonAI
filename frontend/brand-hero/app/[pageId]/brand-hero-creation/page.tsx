@@ -83,8 +83,9 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
                             <Typography variant="h6" gutterBottom>
                               Your Brand Profile
                             </Typography>
-                            <Typography variant="body2" component="pre" sx={{ whiteSpace: "pre-wrap", overflowY: "auto", flex: '1 1 0' }}>
+                            <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-wrap", overflowY: "auto", flex: '1 1 0' }}>
                               <img src={data.image_url} alt="" className="src"/>
+                              <pre>{data.brandhero_context}</pre>
                             </Typography>
                             <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
                               <Button variant="contained" color="primary" onClick={handleConfirmProfile}>
