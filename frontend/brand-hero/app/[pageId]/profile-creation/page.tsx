@@ -19,6 +19,8 @@ import {
 } from "@mui/material"
 import { Send } from "lucide-react"
 import Header from "@/components/header"
+import {ProfileChat} from "@/app/[pageId]/profile-creation/ProfileChat";
+import {Stack} from "@mui/system";
 
 // Define a proper type for the message objects
 interface ChatMessage {
@@ -55,7 +57,7 @@ const ChatContainer = styled(Box)`
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow: hidden;
+  //overflow: hidden;
 `
 
 const MessagesContainer = styled(Box)`
@@ -78,33 +80,13 @@ const ProfileSummaryCard = styled(Card)`
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   border-radius: 16px;
-  overflow: hidden;
+  //overflow: hidden;
   
   pre {
     font-family: inherit;
   }
 `
 
-const Message = styled(Box)<{ isUser: boolean }>`
-  max-width: 80%;
-  align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
-  display: flex;
-  gap: 0.5rem;
-`
-
-// Use inline styles for MessageContent instead of accessing theme directly in styled-components
-const MessageContent = styled(Paper)<{ isUser: boolean; bgcolor: string; textcolor: string }>`
-  padding: 0.75rem 1rem;
-  border-radius: 1rem;
-  background-color: ${(props) => props.bgcolor};
-  color: ${(props) => props.textcolor};
-  box-shadow: ${(props) =>
-    props.isUser
-      ? "0 2px 8px rgba(99, 102, 241, 0.2)"
-      : props.theme.palette.mode === "dark"
-        ? "0 2px 8px rgba(0, 0, 0, 0.2)"
-        : "0 2px 8px rgba(0, 0, 0, 0.05)"};
-`
 
 // Mock loading messages
 const loadingMessages = [
@@ -176,14 +158,10 @@ const mockProfileSummary = `
 const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
   const [stage, setStage] = useState<"loading" | "chat" | "summary">("loading")
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0])
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [inputValue, setInputValue] = useState("")
   const [profileSummary, setProfileSummary] = useState("")
   const [showSummary, setShowSummary] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
-  const messagesEndRef = useRef<null | HTMLDivElement>(null)
   const router = useRouter()
-  const theme = useTheme() // Get MUI theme
 
   useEffect(() => {
     // Check if user is logged in
@@ -212,19 +190,6 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
     const timeout = setTimeout(() => {
       clearInterval(interval)
       setStage("chat")
-
-      // If in edit mode, modify the first message to indicate we're editing
-      if (existingProfile) {
-        setMessages([
-          {
-            id: 1,
-            isUser: false,
-            text: "I see you already have a company profile. Let's review and refine it. What would you like to change or improve about your current profile?",
-          },
-        ])
-      } else {
-        setMessages([mockConversation[0]])
-      }
     }, 6000)
 
     return () => {
@@ -233,82 +198,6 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
     }
   }, [router])
 
-  useEffect(() => {
-    // Scroll to bottom when messages change
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
-
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return
-
-    const userMessage = {
-      id: Date.now(),
-      isUser: true,
-      text: inputValue.trim(),
-    }
-
-    // Add the user message
-    setMessages((prev) => [...prev, userMessage])
-    setInputValue("")
-
-    // Simulate AI response
-    setTimeout(() => {
-      // Use functional update to get the latest messages state
-      setMessages((currentMessages) => {
-        const currentMessageCount = currentMessages.length
-
-        // If in edit mode, provide custom responses
-        if (isEditMode) {
-          // After 2 exchanges, show the updated profile
-          if (currentMessageCount >= 3) {
-            setShowSummary(true)
-            return [
-              ...currentMessages,
-              {
-                id: Date.now(),
-                isUser: false,
-                text: "I've updated your profile based on our conversation. You can review it and make further changes if needed.",
-              },
-            ]
-          }
-
-          return [
-            ...currentMessages,
-            {
-              id: Date.now(),
-              isUser: false,
-              text: "Thank you for that information. Is there anything else you'd like to update about your profile?",
-            },
-          ]
-        }
-
-        // Regular flow for new profile creation
-        const messageIndex = Math.floor(currentMessageCount / 2)
-
-        if (messageIndex + 1 < mockConversation.length) {
-          // Add the next AI message
-          const nextAiMessage = mockConversation[messageIndex + 1]
-
-          // If this is the last AI message, show the profile summary
-          if (messageIndex + 1 === mockConversation.length - 1) {
-            setProfileSummary(mockProfileSummary)
-            setShowSummary(true)
-          }
-
-          return [...currentMessages, nextAiMessage]
-        }
-
-        return currentMessages
-      })
-    }, 1000)
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
-  }
 
   const handleConfirmProfile = () => {
     // Save profile to localStorage (in a real app, this would be saved to a database)
@@ -342,71 +231,44 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
             </Typography>
           </LoadingContainer>
         ) : (
-          <ChatContainer>
+          <ChatContainer sx={{height: "100%"}}>
             <Typography variant="h5" gutterBottom>
               {isEditMode ? "Editing Your Company Profile" : "Creating Your Company Profile"}
             </Typography>
 
-            {showSummary && (
-              <ProfileSummaryCard>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Your Brand Profile
-                  </Typography>
-                  <Typography variant="body2" component="pre" sx={{ whiteSpace: "pre-wrap" }}>
-                    {profileSummary}
-                  </Typography>
-                  <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-                    {isEditMode && (
-                      <Button variant="outlined" color="inherit" onClick={handleCancel}>
-                        Cancel
-                      </Button>
-                    )}
-                    <Button variant="contained" color="primary" onClick={handleConfirmProfile}>
-                      {isEditMode ? "Save Changes" : "Confirm Profile & Continue"}
-                    </Button>
-                  </Box>
-                </CardContent>
-              </ProfileSummaryCard>
-            )}
+            <Stack direction="row" spacing={2} sx={{ mb: 2, flexGrow: 1, height: "100%" }}>
+              {showSummary && (
+                  <ProfileSummaryCard sx={{ flexBasis: "50%"}}>
+                    <CardContent sx={{height: "100%"}}>
+                      <Stack direction="column" spacing={2} justifyContent="stretch" sx={{height: "100%"}}>
+                        <Typography variant="h6" gutterBottom>
+                          Your Brand Profile
+                        </Typography>
+                        <Typography variant="body2" component="pre" sx={{ whiteSpace: "pre-wrap", overflowY: "auto", flex: '1 1 0' }}>
+                          {profileSummary}
+                        </Typography>
+                        <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
+                          {isEditMode && (
+                              <Button variant="outlined" color="inherit" onClick={handleCancel}>
+                                Cancel
+                              </Button>
+                          )}
+                          <Button variant="contained" color="primary" onClick={handleConfirmProfile}>
+                            {isEditMode ? "Save Changes" : "Confirm Profile & Continue"}
+                          </Button>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </ProfileSummaryCard>
+              )}
 
-            <MessagesContainer>
-              {Array.isArray(messages) &&
-                messages.map((message) => {
-                  // Skip rendering if message is undefined
-                  if (!message) return null
+              <Box sx={{flex: 1, flexBasis: "50%"}}>
+                <ProfileChat/>
+              </Box>
 
-                  return (
-                    <Message key={message.id} isUser={Boolean(message.isUser)}>
-                      {!message.isUser && <Avatar sx={{ bgcolor: "primary.main" }}>AI</Avatar>}
-                      <MessageContent
-                        isUser={Boolean(message.isUser)}
-                        bgcolor={message.isUser ? theme.palette.primary.main : theme.palette.background.paper}
-                        textcolor={message.isUser ? "#fff" : theme.palette.text.primary}
-                      >
-                        <Typography variant="body2">{message.text}</Typography>
-                      </MessageContent>
-                    </Message>
-                  )
-                })}
-              <div ref={messagesEndRef} />
-            </MessagesContainer>
+            </Stack>
 
-            <MessageInputContainer>
-              <TextField
-                fullWidth
-                placeholder="Type your message..."
-                variant="outlined"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                multiline
-                maxRows={4}
-              />
-              <Button variant="contained" color="primary" onClick={handleSendMessage} disabled={!inputValue.trim()}>
-                <Send size={20} />
-              </Button>
-            </MessageInputContainer>
+
           </ChatContainer>
         )}
       </StyledContainer>

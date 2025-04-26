@@ -1,8 +1,8 @@
 "use client"
 
-import {Chat} from "@/components/chat";
+import {ProfileChat} from "@/app/[pageId]/profile-creation/ProfileChat";
 
 const TestChatPage = () =>
-    <Chat/>
+    <ProfileChat/>
 
 export default TestChatPage;
