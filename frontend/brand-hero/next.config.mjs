@@ -24,6 +24,10 @@ const nextConfig = {
     {
       source: "/api/images/:path*",
       destination: "http://localhost:8070/api/images/:path*",
+    },
+    {
+      source: "/api/strategy/:path*",
+      destination: "http://localhost:8070/api/strategy/:path*",
     }
   ]
 }

@@ -121,6 +121,17 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
         ),
   })
 
+  const { data: strategyData } = useQuery({
+    queryKey: ['get.strategy'],
+    queryFn: () =>
+        fetch(`/api/strategy/${pageId}`).then((res): Promise<{
+          company_id: string;
+          strategy: string;
+        }> =>
+            res.json(),
+        ),
+  })
+
   useEffect(() => {
     // Check if user is logged in and has completed setup
     const token = localStorage.getItem("fb_access_token")
@@ -158,6 +169,10 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
 
   const handleCreatePosts = () => {
     router.push(`/${pageId}/create-posts`)
+  }
+
+  const handleCreateStrategy = () => {
+    router.push(`/${pageId}/strategy-creation`)
   }
 
   const handleApprovePost = (postId: number) => {
@@ -227,11 +242,12 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
           </TileCard>
         </Box>
 
+          <Button sx={{width: '100%', my: 4}} variant="contained" color="primary" startIcon={!strategyData?.strategy && <Plus size={18} />} onClick={handleCreateStrategy}>
+            {strategyData?.strategy ? 'Edit Strategy' : 'Create Strategy'}
+          </Button>
+
         <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h5">Scheduled Posts</Typography>
-          <Button variant="contained" color="primary" startIcon={<Plus size={18} />} onClick={handleCreatePosts}>
-            Create Posts
-          </Button>
         </Box>
 
         <Paper>
@@ -298,10 +314,10 @@ const Dashboard = ({params: {pageId}}: {params: {pageId: string}}) => {
                 No Posts Scheduled
               </Typography>
               <Typography variant="body2" color="textSecondary" paragraph>
-                Create your first post to start engaging with your audience
+                Create a strategy to start engaging with your audience
               </Typography>
-              <Button variant="contained" color="primary" startIcon={<Plus size={18} />} onClick={handleCreatePosts}>
-                Create Posts
+              <Button variant="contained" color="primary" startIcon={<Plus size={18} />} onClick={handleCreateStrategy}>
+                Create Strategy
               </Button>
             </EmptyPostsContainer>
           )}

@@ -43,7 +43,7 @@ const ProfileSummaryCard = styled(Card)`
   }
 `
 
-const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
+const BrandHeroCreationPage = ({ params }: { params: { pageId: string } }) => {
   const router = useRouter()
   const queryClient = useQueryClient();
 
@@ -115,4 +115,4 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
   )
 }
 
-export default ProfileCreationPage
+export default BrandHeroCreationPage
