@@ -181,11 +181,10 @@ async def get_image(file_id: str):
     return StreamingResponse(io.BytesIO(image_data), media_type=content_type)
 
 
-app = FastAPI()
-app.include_router(router, prefix='/api')
 
 
-@app.post("/api/strategy/{company_id}")
+
+@router.post("/strategy/{company_id}")
 async def run_strategy_agent(company_id: str, request: StrategyRequest = None):
     try:
         logger.info(f"Working on strategy for company_id: {company_id}")
@@ -204,7 +203,7 @@ async def run_strategy_agent(company_id: str, request: StrategyRequest = None):
         logger.exception(f"Strategy generation failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Strategy generation failed: {str(e)}")
     
-@app.post("/posts/edit")
+@router.post("/posts/edit")
 async def edit_post(request: PostEditRequest):
     try:
         logger.info(f"Editing post for company_id: {request.company_id}")
@@ -233,7 +232,7 @@ async def edit_post(request: PostEditRequest):
         logger.exception(f"Post edit failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Post edit failed: {str(e)}")
 
-@app.get("/strategy/{company_id}", response_model=StrategyResponse)
+@router.get("/strategy/{company_id}", response_model=StrategyResponse)
 async def get_strategy(company_id: str):
     """
     Get the strategy for a specific company by company_id.
@@ -257,3 +256,6 @@ async def get_strategy(company_id: str):
     except Exception as e:
         logger.exception(f"Error fetching strategy: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching strategy: {str(e)}")
+
+app = FastAPI()
+app.include_router(router, prefix='/api')
