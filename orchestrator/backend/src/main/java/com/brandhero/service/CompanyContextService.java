@@ -68,11 +68,11 @@ public class CompanyContextService {
         int postLimit = request.getPostLimit() != null ? request.getPostLimit() : defaultPostLimit;
         List<FacebookPost> posts = facebookService.getPagePosts(request.getPageId(), request.getPageAccessToken(), postLimit);
 
-        vectorStoreService.save(objectMapper.valueToTree(page));
-        vectorStoreService.save(objectMapper.valueToTree(posts));
+        //vectorStoreService.save(objectMapper.valueToTree(page));
 
         // Generate context using agent
         String contextContent = generateContextWithAgent(page, posts);
+        vectorStoreService.save(generateContextJsonNode(page, posts));
 
         // Save context to database
         CompanyContext companyContext = CompanyContext.builder()
@@ -175,24 +175,41 @@ public class CompanyContextService {
     private JsonNode convertPostToJson(FacebookPost post) {
         ObjectNode postNode = objectMapper.createObjectNode();
         postNode.put("id", post.getId());
+        postNode.put("pageId", post.getPageId());
         postNode.put("message", post.getMessage());
         postNode.put("created_time", post.getCreatedTime().toString());
-        postNode.put("type", post.getType());
-        postNode.put("permalink", post.getPermalink());
-        postNode.put("likes_count", post.getLikesCount());
-        postNode.put("comments_count", post.getCommentsCount());
-        postNode.put("shares_count", post.getSharesCount());
 
         if (post.getImageUrls() != null && !post.getImageUrls().isEmpty()) {
             ArrayNode imageUrlsNode = postNode.putArray("image_urls");
             post.getImageUrls().forEach(imageUrlsNode::add);
         }
-        
-        postNode.put("video_url", post.getVideoUrl());
-        postNode.put("link_url", post.getLinkUrl());
-        postNode.put("link_title", post.getLinkTitle());
-        postNode.put("link_description", post.getLinkDescription());
+
         
         return postNode;
+    }
+
+    private JsonNode generateContextJsonNode(FacebookPage page, List<FacebookPost> posts) {
+        log.info("Generating context with agent for page: {}", page.getName());
+
+            // Prepare request to agent
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            ObjectNode requestBody = objectMapper.createObjectNode();
+            requestBody.put("page_id", page.getId());
+            requestBody.put("page_name", page.getName());
+            requestBody.put("page_category", page.getCategory());
+            requestBody.put("page_about", page.getAbout());
+            requestBody.put("page_description", page.getDescription());
+            requestBody.put("page_website", page.getWebsite());
+
+            requestBody.putArray("posts")
+                    .addAll(posts.stream()
+                            .map(this::convertPostToJson)
+                            .collect(Collectors.toList()));
+
+            return requestBody;
+
+
     }
 }

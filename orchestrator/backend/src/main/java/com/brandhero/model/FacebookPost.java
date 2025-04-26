@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 public class FacebookPost {
     
     private String id;
+    private String pageId;
     private String message;
     private LocalDateTime createdTime;
     private String type; // photo, video, status, link, etc.
