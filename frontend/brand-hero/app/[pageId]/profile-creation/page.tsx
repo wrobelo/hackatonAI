@@ -14,11 +14,11 @@ import {
   CardContent,
 } from "@mui/material"
 import Header from "@/components/header"
-import {ProfileChat} from "@/app/[pageId]/profile-creation/ProfileChat";
 import {Stack} from "@mui/system";
 import {
-  useQuery,
+  useQuery, useQueryClient,
 } from '@tanstack/react-query'
+import {ContextChat} from "@/components/ContextChat";
 
 
 const StyledContainer = styled(Container)`
@@ -78,6 +78,7 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
   const [isEditMode, setIsEditMode] = useState(false)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const router = useRouter()
+  const queryClient = useQueryClient();
 
   const { isPending, error, data } = useQuery({
     queryKey: ['get.company-context'],
@@ -190,7 +191,12 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
               )}
 
               <Box sx={{flex: 1, flexBasis: "50%"}}>
-                <ProfileChat pageId={params.pageId}/>
+                <ContextChat
+                    endpoint={`/api/company-context/${params.pageId}`}
+                    onResponse={() => queryClient.invalidateQueries({
+                      queryKey: ['get.company-context']
+                    })}
+                />
               </Box>
 
             </Stack>

@@ -2,11 +2,11 @@
 
 spring:
   ai:
-    vectorstore:
-      qdrant:
-        url: http://localhost:6333
-        collection-name: brand_hero
-        initialize-schema: true
+#    vectorstore:
+#      qdrant:
+#        url: http://localhost:6333
+#        collection-name: brand_hero
+#        initialize-schema: true
     openai:
       api-key: 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
 

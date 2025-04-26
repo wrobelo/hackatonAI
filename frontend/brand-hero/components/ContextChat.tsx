@@ -1,9 +1,8 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {Chat, ChatMessage} from "@/components/chat";
-import { useQueryClient } from '@tanstack/react-query'
 
-interface ProfileChatResponse {
+interface ContextChatResponse {
     "company_id":string,
     "result": {
         "output": string,
@@ -11,23 +10,31 @@ interface ProfileChatResponse {
     }
 }
 
-export const ProfileChat = ({pageId}: {pageId: string}) => {
+export const ContextChat = ({endpoint, onResponse}: {
+    endpoint: string,
+    onResponse: () => void
+}) => {
     const [messages, setMessages] = useState<ChatMessage[]>([])
-    const queryClient = useQueryClient()
+    const [processing, setProcessing] = useState(false);
 
-    const handleSendMessage = async (inputValue: string) => {
-        if (!inputValue.trim()) return;
+    useEffect(() => {
+        handleSendMessage('', true)
+    }, [])
+
+    const handleSendMessage = async (inputValue: string, initialMessage?: boolean) => {
+        if (!inputValue.trim() && !initialMessage) return;
+        setProcessing(true);
 
         const userMessage: ChatMessage = {
             id: messages.length + 1,
             isUser: true,
-            text: inputValue.trim()
+            text: initialMessage ? '' : inputValue.trim()
         };
 
         setMessages(prev => [...prev, userMessage]);
 
         try {
-            const response = await axios.post<ProfileChatResponse>(`/api/company-context/${pageId}`, {
+            const response = await axios.post<ContextChatResponse>(endpoint, {
                 user_response: userMessage.text
             });
 
@@ -38,7 +45,7 @@ export const ProfileChat = ({pageId}: {pageId: string}) => {
             };
 
             setMessages(prev => [...prev, aiMessage]);
-            queryClient.invalidateQueries({queryKey: ['get.company-context']});
+            onResponse();
         } catch (error) {
             console.error('Error sending message:', error);
             const errorMessage: ChatMessage = {
@@ -47,12 +54,14 @@ export const ProfileChat = ({pageId}: {pageId: string}) => {
                 text: "Sorry, there was an error processing your message."
             };
             setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setProcessing(false);
         }
     }
 
 
     return (
-        <Chat messages={messages} onMessageSent={handleSendMessage} />
+        <Chat messages={messages} onMessageSent={handleSendMessage} processing={processing} />
     )
 
 }
