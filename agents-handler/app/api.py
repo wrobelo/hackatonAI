@@ -36,7 +36,6 @@ agentbh = bh_agent.agent
 runnerbh = bh_agent.runner
 run_run_bh_agent_wrapper = bh_agent.run_bh_agent
 
-from app.brandheroagents.brandhero_orchestrator import BrandHeroOrchestratorAgent
 
 # Load .env at module import
 base_dir = os.path.dirname(os.path.dirname(__file__))
@@ -45,7 +44,6 @@ load_dotenv(dotenv_path)
 
 router = APIRouter()
 ag = OrchestratorAgent()
-bag = BrandHeroOrchestratorAgent()
 
 client = OpenAI()
 
