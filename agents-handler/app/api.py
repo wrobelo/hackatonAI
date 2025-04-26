@@ -72,18 +72,8 @@ logger = logging.getLogger(__name__)
 client = OpenAI()
 client.api_key = os.getenv("OPENAI_API_KEY")
 
-@app.get("/test-image")
-async def test_image():
-    try:
-        img_resp = client.images.generate(
-        prompt="A simple blue circle on a white background",
-        n=1,
-        size="512x512")
-        return {"success": True, "url": img_resp.data[0].url}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
  
-@app.get("/api/posts/{company_id}", response_model=List[PostProposal])
+@router.get("/posts/{company_id}", response_model=List[PostProposal])
 async def get_posts(company_id: str):
     """
     Generate 3/5/7 social-media posts for the given company_id.
