@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { styled } from "styled-components"
 import { Box, Typography, Button, Container, Paper, useTheme } from "@mui/material"
 import { Facebook } from "lucide-react"
+import {signIn, useSession} from "next-auth/react"
 
 const StyledContainer = styled(Container)`
   display: flex;
@@ -48,21 +49,27 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const theme = useTheme()
+  const {data: session, status} = useSession()
+
+  if (status === "loading") {
+    return null
+  }
+
+  if (session) {
+    router.push("/pages")
+    return null
+  }
 
   const handleFacebookLogin = async () => {
     setIsLoading(true)
-
-    // In a real implementation, you would redirect to Facebook OAuth
-    // For now, we'll simulate the login process
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Store a mock token in localStorage
-      localStorage.setItem("fb_access_token", "mock_token_123")
-
-      // Redirect to page selection
-      router.push("/pages")
+      const result = await signIn("facebook", {
+        callbackUrl: "/pages",
+        redirect: true
+      })
+      if (result?.error) {
+        throw new Error(result.error)
+      }
     } catch (error) {
       console.error("Login failed:", error)
       setIsLoading(false)
