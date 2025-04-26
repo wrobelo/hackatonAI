@@ -61,8 +61,11 @@ interface ChatMessage {
 }
 
 interface ApiResponse {
-    message: string;
-    id: number;
+    "company_id":string,
+    "result": {
+        "output": string,
+        "previous_response_id": string,
+    }
 }
 
 export const Chat = () => {
@@ -89,14 +92,14 @@ export const Chat = () => {
         setInputValue("");
 
         try {
-            const response = await axios.post<ApiResponse>('/api/chat', {
-                message: userMessage.text
+            const response = await axios.post<ApiResponse>('/api/company-context/ASD-231', {
+                user_response: userMessage.text
             });
 
             const aiMessage: ChatMessage = {
                 id: messages.length + 2,
                 isUser: false,
-                text: response.data.message
+                text: response.data.result.output
             };
 
             setMessages(prev => [...prev, aiMessage]);
