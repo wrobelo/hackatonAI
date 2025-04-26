@@ -81,7 +81,7 @@ async def run_company_context_agent(company_id: str, request: CompanyContextRequ
 async def get_company_context_endpoint(company_id: str):
     try:
         # Pobierz dokument z MongoDB
-        doc = context_agent.company_context_collection.find_one({"company_id": company_id})
+        doc = await get_company_context(company_id)
 
         # Jeśli dokument nie istnieje lub nie ma context_description, zwróć 404
         if not doc or "context_description" not in doc:
