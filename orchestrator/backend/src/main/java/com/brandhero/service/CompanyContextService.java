@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.brandhero.ai.VectorStoreService;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +41,7 @@ public class CompanyContextService {
     private final UserSessionService userSessionService;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final VectorStoreService vectorStoreService;
     
     @Value("${agent.endpoint.url}")
     private String agentEndpointUrl;
@@ -53,7 +56,8 @@ public class CompanyContextService {
      * @param request the create context request
      * @return the created company context
      */
-    public CompanyContext createCompanyContext(String username, CreateContextRequest request) {
+    @SneakyThrows
+    public CompanyContext createCompanyContextEmbedding(String username, CreateContextRequest request) {
         log.info("Creating company context for page {} and user {}", request.getPageId(), username);
 
         
@@ -63,10 +67,13 @@ public class CompanyContextService {
         // Get page posts
         int postLimit = request.getPostLimit() != null ? request.getPostLimit() : defaultPostLimit;
         List<FacebookPost> posts = facebookService.getPagePosts(request.getPageId(), request.getPageAccessToken(), postLimit);
-        
+
+        vectorStoreService.save(objectMapper.valueToTree(page));
+        vectorStoreService.save(objectMapper.valueToTree(posts));
+
         // Generate context using agent
         String contextContent = generateContextWithAgent(page, posts);
-        
+
         // Save context to database
         CompanyContext companyContext = CompanyContext.builder()
                 .pageId(page.getId())

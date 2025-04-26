@@ -44,7 +44,7 @@ public class CompanyContextController {
      * @return a response entity with the company context
      */
     @PostMapping("/{username}")
-    public ResponseEntity<CompanyContextResponse> createCompanyContext(
+    public ResponseEntity<CompanyContextResponse> createCompanyContextEmbedding(
             @PathVariable String username,
             @Valid @RequestBody CreateContextRequest request) {
         
@@ -65,7 +65,7 @@ public class CompanyContextController {
         }
         
         try {
-            CompanyContext companyContext = companyContextService.createCompanyContext(username, request);
+            CompanyContext companyContext = companyContextService.createCompanyContextEmbedding(username, request);
             CompanyContextResponse response = CompanyContextResponse.from(companyContext);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
