@@ -16,10 +16,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateContextRequest {
     
-    @NotBlank(message = "Page ID is required")
-    private String pageId;
+    @NotBlank(message = "Page accessToken is required")
+    private String pageAccessToken;
     
-    private String pageName;
+    private String pageId;
     
     /**
      * Number of posts to fetch for context generation.

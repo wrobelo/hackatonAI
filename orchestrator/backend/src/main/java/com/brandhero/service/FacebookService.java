@@ -92,9 +92,10 @@ public class FacebookService {
         FacebookClient facebookClient = createFacebookClient(accessToken);
         
         Connection<Post> postsConnection = facebookClient.fetchConnection(
-                pageId + "/posts", 
+                pageId + "/feed",
                 Post.class, 
-                Parameter.with("fields", "id,message,created_time,type,permalink_url,likes.summary(true),comments.summary(true),shares,attachments"),
+                Parameter.with("fields", "attachments,created_time"),
+                //Parameter.with("fields", "id,message,created_time,type,permalink_url,likes.summary(true),comments.summary(true),shares"),
                 Parameter.with("limit", postLimit)
         );
         
@@ -156,7 +157,7 @@ public class FacebookService {
      * @return a FacebookClient
      */
     private FacebookClient createFacebookClient(String accessToken) {
-        return new DefaultFacebookClient(accessToken, Version.VERSION_22_0);
+        return new DefaultFacebookClient(accessToken, Version.VERSION_18_0);
     }
     
     /**
