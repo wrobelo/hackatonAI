@@ -54,24 +54,18 @@ const MessageContent = styled(Paper)<{ isUser: boolean; bgcolor: string; textcol
             : "0 2px 8px rgba(0, 0, 0, 0.05)"};
 `
 // Define a proper type for the message objects
-interface ChatMessage {
+export interface ChatMessage {
     id: number
     isUser: boolean
     text: string
 }
 
-interface ApiResponse {
-    "company_id":string,
-    "result": {
-        "output": string,
-        "previous_response_id": string,
-    }
-}
-
-export const Chat = () => {
+export const Chat = ({messages, onMessageSent}: {
+    messages: ChatMessage[],
+    onMessageSent: (message: string) => void
+}) => {
     const theme = useTheme();
     const messagesEndRef = useRef<null | HTMLDivElement>(null)
-    const [messages, setMessages] = useState<ChatMessage[]>([])
     const [inputValue, setInputValue] = useState("")
     
     useEffect(() => {
@@ -79,39 +73,9 @@ export const Chat = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }, [messages])
 
-    const handleSendMessage = async () => {
-        if (!inputValue.trim()) return;
-
-        const userMessage: ChatMessage = {
-            id: messages.length + 1,
-            isUser: true,
-            text: inputValue.trim()
-        };
-
-        setMessages(prev => [...prev, userMessage]);
-        setInputValue("");
-
-        try {
-            const response = await axios.post<ApiResponse>('/api/company-context/ASD-231', {
-                user_response: userMessage.text
-            });
-
-            const aiMessage: ChatMessage = {
-                id: messages.length + 2,
-                isUser: false,
-                text: response.data.result.output
-            };
-
-            setMessages(prev => [...prev, aiMessage]);
-        } catch (error) {
-            console.error('Error sending message:', error);
-            const errorMessage: ChatMessage = {
-                id: messages.length + 2,
-                isUser: false,
-                text: "Sorry, there was an error processing your message."
-            };
-            setMessages(prev => [...prev, errorMessage]);
-        }
+    const handleSendMessage = () => {
+        onMessageSent(inputValue)
+        setInputValue("")
     }
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -154,7 +118,7 @@ export const Chat = () => {
                     variant="outlined"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyPress}
                     multiline
                     maxRows={4}
                 />
