@@ -55,22 +55,14 @@ public class CompanyContextService {
      */
     public CompanyContext createCompanyContext(String username, CreateContextRequest request) {
         log.info("Creating company context for page {} and user {}", request.getPageId(), username);
-        
-        Optional<UserSession> userSessionOpt = userSessionService.getSessionByUsername(username);
-        
-        if (userSessionOpt.isEmpty()) {
-            throw new IllegalArgumentException("User session not found for username: " + username);
-        }
-        
-        UserSession userSession = userSessionOpt.get();
-        String accessToken = userSession.getAccessToken();
+
         
         // Get page info
-        FacebookPage page = facebookService.getPageInfo(request.getPageId(), accessToken);
+        FacebookPage page = facebookService.getPageInfo(request.getPageId(), request.getPageAccessToken());
         
         // Get page posts
         int postLimit = request.getPostLimit() != null ? request.getPostLimit() : defaultPostLimit;
-        List<FacebookPost> posts = facebookService.getPagePosts(request.getPageId(), accessToken, postLimit);
+        List<FacebookPost> posts = facebookService.getPagePosts(request.getPageId(), request.getPageAccessToken(), postLimit);
         
         // Generate context using agent
         String contextContent = generateContextWithAgent(page, posts);
@@ -79,7 +71,6 @@ public class CompanyContextService {
         CompanyContext companyContext = CompanyContext.builder()
                 .pageId(page.getId())
                 .pageName(page.getName())
-                .userId(userSession.getId())
                 .username(username)
                 .contextContent(contextContent)
                 .createdAt(LocalDateTime.now())
