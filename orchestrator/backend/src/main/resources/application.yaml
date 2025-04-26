@@ -1,11 +1,15 @@
+
+
 spring:
   ai:
     vectorstore:
       qdrant:
         url: http://localhost:6333
         collection-name: brand_hero
+        initialize-schema: true
     openai:
-      api-key: ${OPENAI_API_KEY}
+      api-key: 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
+
   data:
     mongodb:
       host: localhost
@@ -33,3 +37,5 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /v3/api-docs/swagger-ui.html
+server:
+  port: 8090

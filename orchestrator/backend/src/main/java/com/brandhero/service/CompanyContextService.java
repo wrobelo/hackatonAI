@@ -72,7 +72,8 @@ public class CompanyContextService {
 
         // Generate context using agent
         String contextContent = generateContextWithAgent(page, posts);
-        vectorStoreService.save(generateContextJsonNode(page, posts));
+        vectorStoreService.save(convertPageToJson(page));
+        posts.stream().forEach(post -> vectorStoreService.save(convertPostToJson(post)));
 
         // Save context to database
         CompanyContext companyContext = CompanyContext.builder()
@@ -188,7 +189,7 @@ public class CompanyContextService {
         return postNode;
     }
 
-    private JsonNode generateContextJsonNode(FacebookPage page, List<FacebookPost> posts) {
+    private JsonNode convertPageToJson(FacebookPage page) {
         log.info("Generating context with agent for page: {}", page.getName());
 
             // Prepare request to agent
@@ -203,10 +204,6 @@ public class CompanyContextService {
             requestBody.put("page_description", page.getDescription());
             requestBody.put("page_website", page.getWebsite());
 
-            requestBody.putArray("posts")
-                    .addAll(posts.stream()
-                            .map(this::convertPostToJson)
-                            .collect(Collectors.toList()));
 
             return requestBody;
 
