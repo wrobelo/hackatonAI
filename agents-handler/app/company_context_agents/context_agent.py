@@ -29,7 +29,7 @@ async def fetch_sql_db(company_id: str) -> Optional[str]:
     Zwraca surowy tekst lub None.
     """
     # … tu logika połączenia z SQL …
-    return "Wstępny opis z SQL DB"  # przykład
+    return ""  # przykład
 
 @function_tool
 async def store_context(company_id: str, context_description: str) -> None:
