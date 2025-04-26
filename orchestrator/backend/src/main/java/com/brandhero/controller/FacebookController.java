@@ -64,6 +64,13 @@ public class FacebookController {
         }
         
         List<FacebookPage> pages = facebookService.getUserPages(userSession.getAccessToken());
+        
+        // Store page IDs and access tokens in the user session
+        for (FacebookPage page : pages) {
+            userSession.getPageAccessTokens().put(page.getId(), page.getAccessToken());
+        }
+        userSessionService.updateSession(userSession);
+        
         PageResponse response = PageResponse.from(username, pages);
         
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -91,12 +98,22 @@ public class FacebookController {
         }
         
         UserSession userSession = userSessionOpt.get();
+        String pageId = request.getPageId();
+        
+        // Get the page access token from the user session
+        String pageAccessToken = userSession.getPageAccessTokens().get(pageId);
+        
+        // If page access token is not found, return an error
+        if (pageAccessToken == null) {
+            log.error("Page access token not found for page ID: {}. User needs to fetch pages first.", pageId);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         
         // If linkUrl is provided, create a post with link
         if (request.getLinkUrl() != null && !request.getLinkUrl().isEmpty()) {
             FacebookPost post = facebookService.createPostWithLink(
-                    request.getPageId(),
-                    userSession.getAccessToken(),
+                    pageId,
+                    pageAccessToken,
                     request.getMessage(),
                     request.getLinkUrl()
             );
@@ -105,8 +122,8 @@ public class FacebookController {
         
         // Otherwise create a text-only post
         FacebookPost post = facebookService.createPost(
-                request.getPageId(),
-                userSession.getAccessToken(),
+                pageId,
+                pageAccessToken,
                 request.getMessage()
         );
         
@@ -145,10 +162,19 @@ public class FacebookController {
         
         UserSession userSession = userSessionOpt.get();
         
+        // Get the page access token from the user session
+        String pageAccessToken = userSession.getPageAccessTokens().get(pageId);
+        
+        // If page access token is not found, return an error
+        if (pageAccessToken == null) {
+            log.error("Page access token not found for page ID: {}. User needs to fetch pages first.", pageId);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
         try {
             FacebookPost post = facebookService.createPostWithImage(
                     pageId,
-                    userSession.getAccessToken(),
+                    pageAccessToken,
                     message,
                     image.getBytes(),
                     image.getOriginalFilename()

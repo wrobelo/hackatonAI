@@ -22,6 +22,18 @@ public class UserSessionService {
     private final UserSessionRepository userSessionRepository;
     
     /**
+     * Update an existing user session.
+     * 
+     * @param userSession the user session to update
+     * @return the updated user session
+     */
+    public UserSession updateSession(UserSession userSession) {
+        log.info("Updating session for user: {}", userSession.getUsername());
+        userSession.updateLastAccessed();
+        return userSessionRepository.save(userSession);
+    }
+    
+    /**
      * Create or update a user session.
      * 
      * @param username the username

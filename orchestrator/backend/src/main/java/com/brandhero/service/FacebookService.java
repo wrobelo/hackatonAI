@@ -177,7 +177,7 @@ public class FacebookService {
         Post completePost = facebookClient.fetchObject(
                 publishedPost.getId(),
                 Post.class,
-                Parameter.with("fields", "attachments,created_time,message,type,permalink_url,likes.summary(true),comments.summary(true),shares")
+                Parameter.with("fields", "attachments,created_time,message")
         );
         
         return convertToFacebookPost(completePost, pageId);

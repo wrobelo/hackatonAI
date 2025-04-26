@@ -16,9 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateContextRequest {
     
-    @NotBlank(message = "Page accessToken is required")
-    private String pageAccessToken;
-    
+    @NotBlank(message = "Page ID is required")
     private String pageId;
     
     /**
