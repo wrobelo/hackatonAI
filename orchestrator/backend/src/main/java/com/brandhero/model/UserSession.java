@@ -1,6 +1,8 @@
 package com.brandhero.model;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -26,6 +28,13 @@ public class UserSession {
     private String username;
     
     private String accessToken;
+    
+    /**
+     * Map of page IDs to their respective access tokens.
+     * This allows storing access tokens for multiple pages that a user manages.
+     */
+    @Builder.Default
+    private Map<String, String> pageAccessTokens = new HashMap<>();
     
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
