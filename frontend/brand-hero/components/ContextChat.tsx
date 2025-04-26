@@ -18,10 +18,12 @@ export const ContextChat = ({endpoint, onResponse}: {
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
-        handleSendMessage('', true)
+        const timeout = setTimeout(() => handleSendMessage(''), 50)
+        return () => clearTimeout(timeout)
     }, [])
 
-    const handleSendMessage = async (inputValue: string, initialMessage?: boolean) => {
+    const handleSendMessage = async (inputValue: string) => {
+        const initialMessage = messages.length === 0;
         if (!inputValue.trim() && !initialMessage) return;
         setProcessing(true);
 
