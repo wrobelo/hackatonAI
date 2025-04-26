@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI, HTTPException
 from app.schemas import GeneratePostsRequest, PostProposal, CompanyContextRequest, CompanyContextResponse
 from app.agents.orchestrator import OrchestratorAgent
+from app.db.company_context_db import get_company_context
 import importlib.util
 import sys
-import os
 
 
 
@@ -48,13 +48,13 @@ async def run_company_context_agent(company_id: str, request: CompanyContextRequ
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get('/company-context/{company_id}', response_model=CompanyContextResponse)
-async def get_company_context(company_id: str):
+async def get_company_context_endpoint(company_id: str):
     try:
-        # Pobierz dokument z MongoDB
-        doc = context_agent.company_context_collection.find_one({"company_id": company_id})
+        # Pobierz dokument z MongoDB używając funkcji z modułu company_context_db
+        doc = await get_company_context(company_id)
         
-        # Jeśli dokument nie istnieje lub nie ma context_description, zwróć 404
-        if not doc or "context_description" not in doc:
+        # Jeśli dokument nie istnieje, zwróć 404
+        if not doc:
             raise HTTPException(status_code=404, detail=f"Context for company_id {company_id} not found")
         
         # Zwróć context_description
