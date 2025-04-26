@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, HttpUrl, Field
 
 class GeneratePostsRequest(BaseModel):
@@ -81,3 +81,16 @@ class BrandHeroContextResponse(BaseModel):
     brandhero_context: str
     brandhero_description: Optional[str] = None
     image_url: Optional[str] = None
+
+class StrategyRequest(BaseModel):
+    user_response: Optional[str] = None
+
+class PostEditRequest(BaseModel):
+    post: Dict[str, Any]
+    company_id: str  # Add company_id as a required field
+    user_response: Optional[str] = None
+    conversation_id: Optional[str] = None
+
+class StrategyResponse(BaseModel):
+    company_id: str
+    strategy: Dict[str, Any]

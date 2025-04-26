@@ -4,7 +4,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI, HTTPException
 from typing import List
-from app.schemas import GeneratePostsRequest, PostProposal, CompanyContextRequest, StrategyRequest, PostEditRequest, StrategyResponse
+from app.schemas import GeneratePostsRequest, PostProposal, CompanyContextRequest, StrategyRequest, PostEditRequest, StrategyResponse,CompanyContextResponse, BrandHeroContextRequest, BrandHeroContextResponse
 from app.agents.post_generator.post_orchestrator import PostOrchestratorAgent
 from app.agents.research.strategy_agent import StrategyAgent, mongo_db, get_strategy_by_company_id  # Import the StrategyAgent, mongo_db and get_strategy_by_company_id
 from app.db.company_context_db import get_company_context, get_brandhero_context, retrieve_image_from_gridfs

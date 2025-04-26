@@ -23,82 +23,68 @@ class PostsOutput(BaseModel):
     )
 )
 
+
 async def generate_posts(raw_input: str) -> List[Dict]:
+    # 1) Ensure raw_input is valid JSON for the agent
     try:
-        # Sanitize the input
-        sanitized_input = raw_input.replace('\n', ' ').replace('\r', ' ')
-        
-        # Parse the input
-        try:
-            data = json.loads(sanitized_input)
-        except json.JSONDecodeError as e:
-            logger.warning(f"Invalid JSON input to generate_posts: {str(e)}")
-            # Try to create a simplified version of the input
-            data = {
-                "strategy": "Create engaging content",
-                "company_context": {"tone_of_voice": "Professional"},
-                "brand_hero": "Brand mascot"
-            }
-        
-        logger.info(f"Generating posts for strategy")
-        
-        # Create an agent to generate the posts
-        agent = Agent(
-            name="PostProposerTool",
-            instructions=(
-                "You are PostProposerTool.\n"
-                "INPUT: A JSON object with strategy, company_context, and brand_hero.\n\n"
-                "TASK: Create 3 engaging social media posts based on the strategy.\n\n"
-                "Each post must include:\n"
-                "- content: An engaging caption (max 120 chars)\n"
-                "- hashtags: 2-3 relevant hashtags (short tags only)\n"
-                "- call_to_action: A brief (under 20 chars) prompting phrase\n\n"
-                "IMPORTANT: Your response MUST be a valid JSON array of post objects and nothing else."
-            )
+        json.loads(raw_input)
+        payload = raw_input
+    except json.JSONDecodeError:
+        logger.warning("Invalid JSON input, using minimal fallback payload")
+        fallback = {
+            "strategy": "Create engaging content",
+            "company_context": {"tone_of_voice": "professional"},
+            "brand_hero": "Brand mascot"
+        }
+        payload = json.dumps(fallback)
+
+    # 2) Build the Agent with a strict prompt
+    agent = Agent(
+        name="PostProposerTool",
+        instructions=(
+            "You are PostProposerTool.\n"
+            "INPUT: a single JSON object with keys: strategy, company_context, brand_hero.\n"
+            "TASK: Create exactly 3 engaging social media posts.\n\n"
+            "Each post object must have exactly these keys:\n"
+            "  • content        – string, max 120 chars\n"
+            "  • hashtags       – array of 2–3 hashtag strings (without #)\n"
+            "  • call_to_action – string, max 20 chars\n\n"
+            "If you cannot fulfill the request, return an empty array: []\n"
+            "OUTPUT: **EXACTLY** a JSON array of post objects, with no extra text or markup."
         )
-        
-        # Run the agent with sanitized input
-        result = await Runner.run(agent, json.dumps(data))
-        output = result.final_output
-        
-        # Try to parse the JSON output, with sanitization
-        try:
-            # Replace any non-printable characters
-            clean_output = ''.join(char for char in output if char.isprintable() or char in ['\n', '\t', ' '])
-            posts = json.loads(clean_output)
-            
-            if not isinstance(posts, list):
-                logger.warning(f"Expected list but got {type(posts)}")
-                posts = []
+    )
+
+    # 3) Invoke the agent
+    result = await Runner.run(agent, payload)
+    raw = result.final_output.strip()
+    logger.debug("Raw content_agent output: %r", raw)
+
+    # 4) Extract the JSON array from any surrounding text
+    m = re.search(r'(\[.*\])', raw, re.DOTALL)
+    json_text = m.group(1) if m else raw
+
+    # 5) Try strict JSON parse
+    try:
+        posts = json.loads(json_text)
+        if isinstance(posts, list):
             return posts
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse JSON from generate_posts: {str(e)}")
-            
-            # Try to extract JSON if it's embedded in text
-            import re
-            json_pattern = r'\[\s*\{.*\}\s*\]'
-            match = re.search(json_pattern, output, re.DOTALL)
-            if match:
-                try:
-                    clean_match = ''.join(char for char in match.group(0) if char.isprintable() or char in ['\n', '\t', ' '])
-                    posts = json.loads(clean_match)
-                    if isinstance(posts, list):
-                        return posts
-                except:
-                    pass
-            
-            # If all else fails, create a basic post
-            return [{
-                "content": "Our latest updates bring innovative solutions to your challenges. Stay tuned for more!",
-                "hashtags": ["#Innovation", "#Solutions"],
-                "call_to_action": "Learn more!"
-            }]
-            
+        logger.warning("Parsed JSON not a list, got %s", type(posts))
+    except json.JSONDecodeError as e:
+        logger.warning("json.loads failed: %s", e)
+
+    # 6) Try Python literal_eval
+    try:
+        posts = ast.literal_eval(json_text)
+        if isinstance(posts, list):
+            return posts
+        logger.warning("literal_eval did not yield a list, got %s", type(posts))
     except Exception as e:
-        logger.exception(f"Error in generate_posts: {str(e)}")
-        # Return a fallback post if everything fails
-        return [{
-            "content": "We're excited to share our latest updates with you soon!",
-            "hashtags": ["#ComingSoon", "#StayTuned"],
-            "call_to_action": "Check back soon!"
-        }]
+        logger.error("ast.literal_eval failed: %s", e)
+
+    # 7) Ultimate fallback: single stub post
+    logger.error("generate_posts: all parsing attempts failed, returning stub")
+    return [{
+        "content": "Discover our latest innovations designed with you in mind!",
+        "hashtags": ["Innovation", "Solutions", "Quality"],
+        "call_to_action": "Learn more!"
+    }]
