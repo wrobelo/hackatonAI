@@ -2,7 +2,7 @@
 
 import {ProfileChat} from "@/app/[pageId]/profile-creation/ProfileChat";
 
-const TestChatPage = () =>
-    <ProfileChat/>
+const TestChatPage = ({params: {pageId}}: {params: {pageId: string}}) =>
+    <ProfileChat pageId={pageId}/>
 
 export default TestChatPage;

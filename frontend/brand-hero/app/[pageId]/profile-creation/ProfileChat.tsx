@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import axios from "axios";
 import {Chat, ChatMessage} from "@/components/chat";
-
+import { useQueryClient } from '@tanstack/react-query'
 
 interface ProfileChatResponse {
     "company_id":string,
@@ -11,8 +11,9 @@ interface ProfileChatResponse {
     }
 }
 
-export const ProfileChat = () => {
+export const ProfileChat = ({pageId}: {pageId: string}) => {
     const [messages, setMessages] = useState<ChatMessage[]>([])
+    const queryClient = useQueryClient()
 
     const handleSendMessage = async (inputValue: string) => {
         if (!inputValue.trim()) return;
@@ -26,7 +27,7 @@ export const ProfileChat = () => {
         setMessages(prev => [...prev, userMessage]);
 
         try {
-            const response = await axios.post<ProfileChatResponse>('/api/company-context/ASD-231', {
+            const response = await axios.post<ProfileChatResponse>(`/api/company-context/${pageId}`, {
                 user_response: userMessage.text
             });
 
@@ -37,6 +38,7 @@ export const ProfileChat = () => {
             };
 
             setMessages(prev => [...prev, aiMessage]);
+            queryClient.invalidateQueries({queryKey: ['get.company-context']});
         } catch (error) {
             console.error('Error sending message:', error);
             const errorMessage: ChatMessage = {
