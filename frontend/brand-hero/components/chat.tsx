@@ -1,4 +1,4 @@
-import {Avatar, Button, TextField, Typography, useTheme} from "@mui/material";
+import {Avatar, Button, CircularProgress, TextField, Typography, useTheme} from "@mui/material";
 import {Send} from "lucide-react";
 import React, {useEffect} from "react";
 import {useRef, useState} from "react";
@@ -60,8 +60,9 @@ export interface ChatMessage {
     text: string
 }
 
-export const Chat = ({messages, onMessageSent}: {
+export const Chat = ({messages, onMessageSent, processing}: {
     messages: ChatMessage[],
+    processing: boolean,
     onMessageSent: (message: string) => void
 }) => {
     const theme = useTheme();
@@ -79,7 +80,7 @@ export const Chat = ({messages, onMessageSent}: {
     }
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && !e.shiftKey) {
+        if (e.key === "Enter" && !e.shiftKey && !processing) {
             e.preventDefault()
             handleSendMessage()
         }
@@ -122,8 +123,8 @@ export const Chat = ({messages, onMessageSent}: {
                     multiline
                     maxRows={4}
                 />
-                <Button variant="contained" color="primary" onClick={handleSendMessage} disabled={!inputValue.trim()}>
-                    <Send size={20} />
+                <Button variant="contained" color="primary" onClick={handleSendMessage} disabled={!inputValue.trim() || processing}>
+                    {!processing ? (<Send size={20} />) : (<CircularProgress size={20} />)}
                 </Button>
             </MessageInputContainer>
         </ChatContainer>
