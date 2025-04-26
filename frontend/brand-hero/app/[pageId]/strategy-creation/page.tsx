@@ -82,7 +82,7 @@ const StrategyCreationPage = ({ params }: { params: { pageId: string } }) => {
                           Your Brand Profile
                         </Typography>
                         <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-wrap", overflowY: "auto", flex: '1 1 0' }}>
-                          <pre>{data.strategy}</pre>
+                          <pre>{JSON.stringify(data.strategy)}</pre>
                         </Typography>
                         <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
                           <Button variant="contained" color="primary" onClick={handleConfirmProfile}>
