@@ -1,4 +1,11 @@
 spring:
+  ai:
+    vectorstore:
+      qdrant:
+        url: http://localhost:6333
+        collection-name: brand_hero
+    openai:
+      api-key: ${OPENAI_API_KEY}
   data:
     mongodb:
       host: localhost
