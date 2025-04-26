@@ -43,29 +43,6 @@ const ContentContainer = styled(Box)`
   overflow: hidden;
 `
 
-const ChatContainer = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-`
-
-const MessagesContainer = styled(Box)`
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`
-
-const MessageInputContainer = styled(Box)`
-  padding: 1rem;
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-`
-
 const SuggestedPostsContainer = styled(Box)`
   margin-top: 1.5rem;
   
@@ -104,27 +81,6 @@ const PostActions = styled(Box)`
   width: 100%;
   margin-top: 1rem;
   gap: 0.5rem;
-`
-
-const Message = styled(Box)<{ isUser: boolean }>`
-  max-width: 80%;
-  align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
-  display: flex;
-  gap: 0.5rem;
-`
-
-// Use inline styles for MessageContent instead of accessing theme directly in styled-components
-const MessageContent = styled(Paper)<{ isUser: boolean; bgcolor: string; textcolor: string }>`
-  padding: 0.75rem 1rem;
-  border-radius: 1rem;
-  background-color: ${(props) => props.bgcolor};
-  color: ${(props) => props.textcolor};
-  box-shadow: ${(props) =>
-    props.isUser
-      ? "0 2px 8px rgba(99, 102, 241, 0.2)"
-      : props.theme.palette.mode === "dark"
-        ? "0 2px 8px rgba(0, 0, 0, 0.2)"
-        : "0 2px 8px rgba(0, 0, 0, 0.05)"};
 `
 
 // Mock AI conversation
@@ -197,9 +153,7 @@ const CreatePostsPage = ({params}: { params: { pageId: string } }) => {
   const [inputValue, setInputValue] = useState("")
   const [suggestedPosts, setSuggestedPosts] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const messagesEndRef = useRef<null | HTMLDivElement>(null)
   const router = useRouter()
-  const theme = useTheme() // Get MUI theme
 
   useEffect(() => {
     // Check if user is logged in and has completed setup
@@ -215,11 +169,6 @@ const CreatePostsPage = ({params}: { params: { pageId: string } }) => {
     // Initialize chat with first message
     setMessages([mockConversation[0]])
   }, [router])
-
-  useEffect(() => {
-    // Scroll to bottom when messages change
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return
@@ -261,12 +210,6 @@ const CreatePostsPage = ({params}: { params: { pageId: string } }) => {
     }, 1000)
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
-  }
 
   const handleEditPost = (postId: number) => {
     setSuggestedPosts(suggestedPosts.map((post) => (post.id === postId ? { ...post, editing: true } : post)))
@@ -299,45 +242,7 @@ const CreatePostsPage = ({params}: { params: { pageId: string } }) => {
         </Box>
 
         <ContentContainer>
-          <ChatContainer>
-            <MessagesContainer>
-              {Array.isArray(messages) &&
-                messages.map((message) => {
-                  // Skip rendering if message is undefined
-                  if (!message) return null
 
-                  return (
-                    <Message key={message.id} isUser={Boolean(message.isUser)}>
-                      {!message.isUser && <Avatar sx={{ bgcolor: "primary.main" }}>AI</Avatar>}
-                      <MessageContent
-                        isUser={Boolean(message.isUser)}
-                        bgcolor={message.isUser ? theme.palette.primary.main : theme.palette.background.paper}
-                        textcolor={message.isUser ? "#fff" : theme.palette.text.primary}
-                      >
-                        <Typography variant="body2">{message.text}</Typography>
-                      </MessageContent>
-                    </Message>
-                  )
-                })}
-              <div ref={messagesEndRef} />
-            </MessagesContainer>
-
-            <MessageInputContainer>
-              <TextField
-                fullWidth
-                placeholder="Type your message..."
-                variant="outlined"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                multiline
-                maxRows={4}
-              />
-              <Button variant="contained" color="primary" onClick={handleSendMessage} disabled={!inputValue.trim()}>
-                <Send size={20} />
-              </Button>
-            </MessageInputContainer>
-          </ChatContainer>
 
           {showSuggestions && (
             <SuggestedPostsContainer>
