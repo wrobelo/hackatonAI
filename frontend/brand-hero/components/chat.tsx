@@ -88,7 +88,7 @@ export const Chat = ({messages, onMessageSent}: {
     return (
         <ChatContainer>
             <MessagesContainer>
-                <Stack>
+                <Stack gap="1rem">
                 {Array.isArray(messages) &&
                     messages.map((message) => {
                         // Skip rendering if message is undefined
