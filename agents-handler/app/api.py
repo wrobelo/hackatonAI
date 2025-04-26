@@ -1,8 +1,25 @@
 import os
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI, HTTPException
-from app.schemas import GeneratePostsRequest, PostProposal
+from app.schemas import GeneratePostsRequest, PostProposal, CompanyContextRequest
 from app.agents.orchestrator import OrchestratorAgent
+import importlib.util
+import sys
+import os
+
+
+
+
+
+# Dynamic import for agent and runner from app/company-context-agents/context_agent.py
+context_agent_path = os.path.join(os.path.dirname(__file__), "company_context_agents", "context_agent.py")
+spec = importlib.util.spec_from_file_location("context_agent", context_agent_path)
+context_agent = importlib.util.module_from_spec(spec)
+sys.modules["context_agent"] = context_agent
+spec.loader.exec_module(context_agent)
+agent = context_agent.agent
+runner = context_agent.runner
+run_company_context_agent_wrapper = context_agent.run_company_context_agent
 
 # Load .env at module import
 base_dir = os.path.dirname(os.path.dirname(__file__))
@@ -16,6 +33,17 @@ ag = OrchestratorAgent()
 async def generate_posts(req: GeneratePostsRequest):
     try:
         return await ag.generate(req.dict())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post('/company-context/{company_id}')
+async def run_company_context_agent(company_id: str, request: CompanyContextRequest = None):
+    try:
+        # Przekazujemy odpowiedź użytkownika, jeśli istnieje
+        user_response = request.user_response if request and request.user_response else None
+        result = await run_company_context_agent_wrapper(agent, company_id, user_response)
+
+        return {"company_id": company_id, "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

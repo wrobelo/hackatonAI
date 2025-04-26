@@ -1,0 +1,35 @@
+spring:
+  ai:
+    vectorstore:
+      qdrant:
+        url: http://localhost:6333
+        collection-name: brand_hero
+    openai:
+      api-key: ${OPENAI_API_KEY}
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: brandhero
+
+facebook:
+  api:
+    version: v18.0
+    base-url: https://graph.facebook.com/
+
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    com.brandhero: DEBUG
+
+agent:
+  endpoint:
+    url: http://localhost:5000/api/agent
+  post:
+    limit: 1
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /v3/api-docs/swagger-ui.html
