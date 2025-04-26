@@ -76,3 +76,10 @@ class ImageResponse(BaseModel):
 class CompanyContextResponse(BaseModel):
     company_id: str
     context_description: str
+
+class BrandHeroContextResponse(BaseModel):
+    company_id: str
+    brandhero_context: str
+    brandhero_description: Optional[str] = None
+    image_url: Optional[str] = None
+    image_base64: Optional[str] = None
