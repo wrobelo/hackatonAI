@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI, HTTPException
-from app.schemas import GeneratePostsRequest, PostProposal, CompanyContextRequest, CompanyContextResponse, BrandHeroContextRequest
+from app.schemas import GeneratePostsRequest, PostProposal, CompanyContextRequest, CompanyContextResponse, BrandHeroContextRequest, BrandHeroContextResponse
 from app.agents.orchestrator import OrchestratorAgent
-from app.db.company_context_db import get_company_context
+from app.db.company_context_db import get_company_context, get_brandhero_context, retrieve_image_from_gridfs
 import importlib.util
 import sys
 
@@ -81,7 +81,7 @@ async def run_company_context_agent(company_id: str, request: CompanyContextRequ
 async def get_company_context_endpoint(company_id: str):
     try:
         # Pobierz dokument z MongoDB
-        doc = context_agent.company_context_collection.find_one({"company_id": company_id})
+        doc = await get_company_context(company_id)
 
         # Jeśli dokument nie istnieje lub nie ma context_description, zwróć 404
         if not doc or "context_description" not in doc:
@@ -108,36 +108,58 @@ async def run_brand_hero_context_agent(company_id: str, request: BrandHeroContex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get('/brand-hero-context/{company_id}', response_model=BrandHeroContextResponse)
+async def get_brand_hero_context_endpoint(company_id: str):
+    try:
+        # Pobierz dokument z MongoDB
+        doc = await get_brandhero_context(company_id)
+        
+        # Jeśli dokument nie istnieje lub nie ma brandhero_context, zwróć 404
+        if not doc or "brandhero_context" not in doc:
+            raise HTTPException(status_code=404, detail=f"Brand hero context for company_id {company_id} not found")
+        
+        # Przygotuj odpowiedź
+        response = {
+            "company_id": company_id,
+            "brandhero_context": doc["brandhero_context"]
+        }
+        
+        # Dodaj opcjonalne pola, jeśli istnieją
+        if "brandhero_description" in doc:
+            response["brandhero_description"] = doc["brandhero_description"]
+            
+        if "image_url" in doc:
+            response["image_url"] = doc["image_url"]
+            
+            # Jeśli URL wskazuje na nasz własny endpoint z obrazem
+            if doc["image_url"].startswith("/api/images/"):
+                # Pobierz ID obrazu z URL
+                file_id = doc["image_url"].replace("/api/images/", "")
+                
+                # Pobierz obraz z GridFS
+                image_data, content_type = await retrieve_image_from_gridfs(file_id)
+                
+                if image_data:
+                    # Konwertuj obraz do base64
+                    import base64
+                    image_base64 = base64.b64encode(image_data).decode('utf-8')
+                    response["image_base64"] = image_base64
+        
+        return response
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/images/{file_id}")
 async def get_image(file_id: str):
-    image_data, content_type = retrieve_image_from_mongodb(file_id)
+    image_data, content_type = await retrieve_image_from_gridfs(file_id)
 
     if not image_data:
         raise HTTPException(status_code=404, detail=f"Image with ID {file_id} not found")
 
     return StreamingResponse(io.BytesIO(image_data), media_type=content_type)
-
-
-def retrieve_image_from_mongodb(file_id):
-    try:
-        try:
-            grid_out = fs.get(ObjectId(file_id))
-            # Get content type from metadata if available
-            content_type = None
-            if hasattr(grid_out, 'metadata') and grid_out.metadata and 'content_type' in grid_out.metadata:
-                content_type = grid_out.metadata['content_type']
-            else:
-                content_type = 'image/jpeg'
-            return grid_out.read(), content_type
-
-        except gridfs.errors.NoFile:
-            print(f"No file found with ID: {file_id}")
-            return None, None
-
-    except Exception as e:
-        print(f"Error retrieving image from MongoDB: {e}")
-        return None, None
 
 
 app = FastAPI()
