@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.brandhero.ai.VectorStoreService;
+//import com.brandhero.ai.VectorStoreService;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +41,7 @@ public class CompanyContextService {
     private final UserSessionService userSessionService;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final VectorStoreService vectorStoreService;
+    //private final VectorStoreService vectorStoreService;
     
     @Value("${agent.endpoint.url}")
     private String agentEndpointUrl;
@@ -60,13 +60,32 @@ public class CompanyContextService {
     public CompanyContext createCompanyContextEmbedding(String username, CreateContextRequest request) {
         log.info("Creating company context for page {} and user {}", request.getPageId(), username);
 
+        // Get user session to retrieve page access token
+        Optional<UserSession> userSessionOpt = userSessionService.getSessionByUsername(username);
+        
+        if (userSessionOpt.isEmpty()) {
+            log.error("User session not found for username: {}", username);
+            throw new IllegalArgumentException("User session not found");
+        }
+        
+        UserSession userSession = userSessionOpt.get();
+        String pageId = request.getPageId();
+        
+        // Get the page access token from the user session
+        String pageAccessToken = userSession.getPageAccessTokens().get(pageId);
+        
+        // If page access token is not found, throw an error
+        if (pageAccessToken == null) {
+            log.error("Page access token not found for page ID: {}. User needs to fetch pages first.", pageId);
+            throw new IllegalArgumentException("Page access token not found");
+        }
         
         // Get page info
-        FacebookPage page = facebookService.getPageInfo(request.getPageId(), request.getPageAccessToken());
+        FacebookPage page = facebookService.getPageInfo(pageId, pageAccessToken);
         
         // Get page posts
         int postLimit = request.getPostLimit() != null ? request.getPostLimit() : defaultPostLimit;
-        List<FacebookPost> posts = facebookService.getPagePosts(request.getPageId(), request.getPageAccessToken(), postLimit);
+        List<FacebookPost> posts = facebookService.getPagePosts(pageId, pageAccessToken, postLimit);
 
         //vectorStoreService.save(objectMapper.valueToTree(page));
 
