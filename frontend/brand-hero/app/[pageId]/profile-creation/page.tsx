@@ -78,15 +78,18 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
   const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0])
   const [profileSummary, setProfileSummary] = useState("")
   const [isEditMode, setIsEditMode] = useState(false)
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
   const router = useRouter()
 
   const { isPending, error, data } = useQuery({
     queryKey: ['get.company-context'],
-    queryFn: async () =>
-        await axios.get<{
+    queryFn: () =>
+        fetch(`/api/company-context/${params.pageId}`).then((res): Promise<{
           company_id: string;
           context_description: string;
-        }>(`/api/company-context/${params.pageId}`),
+        }> =>
+            res.json(),
+        ),
   })
 
   useEffect(() => {
@@ -100,7 +103,6 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
     // Check if we're in edit mode (profile already exists)
     const existingProfile = localStorage.getItem("company_profile")
     if (existingProfile) {
-      setIsEditMode(true)
       setProfileSummary(existingProfile)
     }
 
@@ -115,13 +117,24 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
     const timeout = setTimeout(() => {
       clearInterval(interval)
       setStage("chat")
-    }, 6000)
+    }, 8000)
 
     return () => {
       clearInterval(interval)
       clearTimeout(timeout)
     }
   }, [router])
+
+  useEffect(() => {
+    if (!initialLoadDone && (data || error)) {
+      const editing = !!data?.context_description
+      if (editing) {
+        setIsEditMode(true);
+        setStage("chat")
+      }
+      setInitialLoadDone(true);
+    }
+  }, [data, error, initialLoadDone]);
 
 
   const handleConfirmProfile = () => {
@@ -136,10 +149,6 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
     }
   }
 
-  const handleCancel = () => {
-    // Only available in edit mode - go back to dashboard
-    router.push(`/${params.pageId}/dashboard`)
-  }
 
   return (
     <>
@@ -149,10 +158,10 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
           <LoadingContainer>
             <CircularProgress size={60} sx={{ mb: 4 }} />
             <Typography variant="h5" gutterBottom>
-              {loadingMessage}
+              {initialLoadDone ? loadingMessage : ''}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              This may take a moment as we analyze your Facebook page
+              {initialLoadDone && 'This may take a moment as we analyze your Facebook page'}
             </Typography>
           </LoadingContainer>
         ) : (
@@ -162,7 +171,7 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
             </Typography>
 
             <Stack direction="row" spacing={2} sx={{ mb: 2, flexGrow: 1, height: "100%" }}>
-              {data?.data.context_description && (
+              {data?.context_description && (
                   <ProfileSummaryCard sx={{ flexBasis: "50%"}}>
                     <CardContent sx={{height: "100%"}}>
                       <Stack direction="column" spacing={2} justifyContent="stretch" sx={{height: "100%"}}>
@@ -170,7 +179,7 @@ const ProfileCreationPage = ({ params }: { params: { pageId: string } }) => {
                           Your Brand Profile
                         </Typography>
                         <Typography variant="body2" component="pre" sx={{ whiteSpace: "pre-wrap", overflowY: "auto", flex: '1 1 0' }}>
-                          {data?.data.context_description}
+                          {data?.context_description}
                         </Typography>
                         <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
                           <Button variant="contained" color="primary" onClick={handleConfirmProfile}>
