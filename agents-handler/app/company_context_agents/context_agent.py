@@ -54,11 +54,11 @@ async def fetch_sql_db(company_id: str) -> Optional[str]:
         # Jeśli istnieje kontekst, zwróć go
         if doc and "context_description" in doc:
             logger.info(f"Retrieved existing context for company_id={company_id}")
-            return f"Aktualny kontekst firmy:\n{doc['context_description']}"
+            return f"Existing company context:\n{doc['context_description']}"
         
         # Tutaj można dodać logikę pobierania danych z SQL, jeśli nie ma kontekstu
         
-        return "Brak danych w bazie SQL i brak istniejącego kontekstu."
+        return None
     except Exception as e:
         logger.error(f"Error fetching data from SQL/MongoDB: {str(e)}")
         return None
@@ -110,15 +110,27 @@ class CompanyContextAgent:
         # 1. Zbuduj kontekst dla agenta
         context = {"company_id": company_id}
         
-        # 2. Pobierz poprzedni identyfikator odpowiedzi z MongoDB
-        # Użyj funkcji z modułu company_context_db
+        # 2. Pobierz poprzedni identyfikator odpowiedzi i kontekst z MongoDB
         from app.db.company_context_db import get_company_context
         doc = await get_company_context(company_id)
         previous_response_id = doc.get("previous_response_id") if doc else None
         
-        # Jeśli mamy odpowiedź użytkownika i poprzedni identyfikator odpowiedzi,
-        # przekazujemy je do agenta
-        if user_response and previous_response_id:
+        # 3. Check if we already have a complete context
+        if doc and "context_description" in doc and not user_response:
+            # We have a complete context and no user response, so we should present the existing data
+            logger.info(f"Found existing complete context for company {company_id}, presenting to user")
+            
+            # Create a special message to inform the agent that we have existing data
+            existing_context_message = f"EXISTING_CONTEXT_DATA: {doc['context_description']}"
+            
+            # Run the agent with this special message
+            result = await Runner.run(
+                self.agent,
+                context=context,
+                input=existing_context_message
+            )
+        # 4. If we have a user response and previous_response_id, continue the conversation
+        elif user_response and previous_response_id:
             # Uruchom agenta z kontekstem i odpowiedzią użytkownika
             logger.info(f"Running agent with user response for company {company_id}")
             result = await Runner.run(

@@ -131,19 +131,7 @@ async def get_brand_hero_context_endpoint(company_id: str):
         if "image_url" in doc:
             response["image_url"] = doc["image_url"]
             
-            # Jeśli URL wskazuje na nasz własny endpoint z obrazem
-            if doc["image_url"].startswith("/api/images/"):
-                # Pobierz ID obrazu z URL
-                file_id = doc["image_url"].replace("/api/images/", "")
-                
-                # Pobierz obraz z GridFS
-                image_data, content_type = await retrieve_image_from_gridfs(file_id)
-                
-                if image_data:
-                    # Konwertuj obraz do base64
-                    import base64
-                    image_base64 = base64.b64encode(image_data).decode('utf-8')
-                    response["image_base64"] = image_base64
+            # No need to include base64 image data in the response
         
         return response
     except HTTPException:
