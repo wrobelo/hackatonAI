@@ -11,6 +11,30 @@ MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
 mongo_client = MongoClient(MONGODB_URI)
 mongo_db = mongo_client[os.getenv("MONGO_DB", "brand-hero")]
 company_context_collection = mongo_db["company_context_memory"]
+company_initial_collection = mongo_db["company_initial_memory"]
+
+async def get_initial_company_data(company_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Pobiera wstępne dane firmy z kolekcji company_initial_collection na podstawie company_id.
+    
+    Args:
+        company_id: Identyfikator firmy
+        
+    Returns:
+        Słownik zawierający wstępne dane firmy lub None, jeśli nie znaleziono
+    """
+    try:
+        # Pobierz dokument z MongoDB
+        doc = company_initial_collection.find_one({"company_id": company_id})
+        
+        if not doc:
+            logger.warning(f"Initial data for company_id {company_id} not found")
+            return None
+        
+        return doc
+    except Exception as e:
+        logger.error(f"Error retrieving initial company data from MongoDB: {str(e)}")
+        return None
 
 async def get_company_context(company_id: str) -> Optional[Dict[str, Any]]:
     """
