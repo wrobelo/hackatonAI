@@ -19,7 +19,6 @@ import {Stack} from "@mui/system";
 import {
   useQuery,
 } from '@tanstack/react-query'
-import axios from "axios";
 
 
 const StyledContainer = styled(Container)`
@@ -56,7 +55,6 @@ const ProfileSummaryCard = styled(Card)`
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   border-radius: 16px;
-  //overflow: hidden;
   
   pre {
     font-family: inherit;
